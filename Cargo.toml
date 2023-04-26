@@ -1,0 +1,18 @@
+[package]
+name = "cosmos-client"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+cosmrs = { version = "0.13.0", features = ["bip32", "cosmwasm"]}
+env_logger = "0.10.0"
+anyhow = "1.0.70"
+prost = { version= "0.11.9" }
+rand_core = "0.6.4"
+tendermint-rpc = {version="0.31.1", features=["http-client"]}
+cosmos-sdk-proto = "0.18.0"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["full"] }
