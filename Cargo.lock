@@ -218,6 +218,7 @@ dependencies = [
  "cosmrs",
  "env_logger",
  "prost",
+ "prost-types",
  "rand_core",
  "tendermint-rpc",
  "tokio",

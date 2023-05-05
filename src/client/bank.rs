@@ -1,9 +1,9 @@
 use cosmos_sdk_proto::cosmos::bank::v1beta1::{
     QueryAllBalancesRequest, QueryAllBalancesResponse, QueryBalanceRequest, QueryBalanceResponse,
     QueryDenomMetadataRequest, QueryDenomMetadataResponse, QueryDenomsMetadataRequest,
-    QueryParamsRequest, QueryParamsResponse, QuerySpendableBalancesRequest,
-    QuerySpendableBalancesResponse, QuerySupplyOfRequest, QuerySupplyOfResponse,
-    QueryTotalSupplyRequest, QueryTotalSupplyResponse,
+    QueryDenomsMetadataResponse, QueryParamsRequest, QueryParamsResponse,
+    QuerySpendableBalancesRequest, QuerySpendableBalancesResponse, QuerySupplyOfRequest,
+    QuerySupplyOfResponse, QueryTotalSupplyRequest, QueryTotalSupplyResponse,
 };
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use prost::Message;
@@ -172,7 +172,7 @@ impl BankModule {
     pub async fn denoms_metadata(
         &self,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryDenomMetadataResponse, anyhow::Error> {
+    ) -> Result<QueryDenomsMetadataResponse, anyhow::Error> {
         let query = QueryDenomsMetadataRequest { pagination };
         let query = self
             .rpc
@@ -185,7 +185,7 @@ impl BankModule {
             .await
             .unwrap();
 
-        let resp = QueryDenomMetadataResponse::decode(query.value.as_slice())?;
+        let resp = QueryDenomsMetadataResponse::decode(query.value.as_slice())?;
         Ok(resp)
     }
 }
