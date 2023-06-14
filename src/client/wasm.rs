@@ -1,15 +1,17 @@
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmwasm::wasm::v1::{
     QueryAllContractStateRequest, QueryAllContractStateResponse, QueryCodeRequest,
-    QueryCodesRequest, QueryCodesResponse, QueryContractHistoryRequest,
+    QueryCodeResponse, QueryCodesRequest, QueryCodesResponse, QueryContractHistoryRequest,
     QueryContractHistoryResponse, QueryContractInfoRequest, QueryContractInfoResponse,
     QueryContractsByCodeRequest, QueryContractsByCodeResponse, QueryPinnedCodesRequest,
     QueryPinnedCodesResponse, QueryRawContractStateRequest, QueryRawContractStateResponse,
-    QuerySmartContractStateRequest, QuerySmartContractStateResponse, QueryCodeResponse
+    QuerySmartContractStateRequest, QuerySmartContractStateResponse,
 };
+use prost::Message;
+use serde::de::DeserializeOwned;
+use serde::Serialize;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};
-use prost::Message;
 
 pub struct WasmModule {
     rpc: Rc<HttpClient>,
@@ -138,16 +140,16 @@ impl WasmModule {
         Ok(resp)
     }
 
-    pub async fn smart_contract_state(
+    pub async fn smart_contract_state<T: Serialize + Clone, U: DeserializeOwned>(
         &self,
         address: &str,
-        query_data: Vec<u8>,
-    ) -> Result<QuerySmartContractStateResponse, anyhow::Error> {
+        msg: T,
+    ) -> Result<U, anyhow::Error> {
         let query = QuerySmartContractStateRequest {
             address: address.to_string(),
-            query_data,
+            query_data: serde_json::to_vec(&msg)?,
         };
-        let query = self
+        let ret = self
             .rpc
             .abci_query(
                 Some("/cosmwasm.wasm.v1.Query/SmartContractState".to_string()),
@@ -158,8 +160,10 @@ impl WasmModule {
             .await
             .unwrap();
 
-        let resp = QuerySmartContractStateResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        let resp: QueryRawContractStateResponse =
+            QueryRawContractStateResponse::decode(ret.value.as_slice())?;
+        println!("{:#?}", ret);
+        Ok(serde_json::from_slice::<U>(&resp.data.as_slice())?)
     }
 
     pub async fn code(&self, code_id: u64) -> Result<QueryCodeResponse, anyhow::Error> {

@@ -1,6 +1,7 @@
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmos_sdk_proto::cosmos::crypto::ed25519::PubKey;
 use cosmos_sdk_proto::cosmos::evidence::v1beta1::Equivocation;
+use cosmos_sdk_proto::cosmos::feegrant::v1beta1::BasicAllowance;
 use cosmos_sdk_proto::Any;
 use prost::Message;
 
@@ -9,6 +10,7 @@ pub enum CosmosType {
     BaseAccount(BaseAccount),
     PubKey(PubKey),
     Equivocation(Equivocation),
+    BasicAllowance(BasicAllowance),
     Unknown {},
 }
 
@@ -22,6 +24,9 @@ pub fn any_to_cosmos(cosmos: &Any) -> Result<CosmosType, anyhow::Error> {
         }
         "/cosmos.evidence.v1beta1.Equivocation" => {
             CosmosType::Equivocation(Equivocation::decode(cosmos.value.as_slice())?)
+        }
+        "/cosmos.feegrant.v1beta1.BasicAllowance" => {
+            CosmosType::BasicAllowance(BasicAllowance::decode(cosmos.value.as_slice())?)
         }
         _ => CosmosType::Unknown {},
     })
