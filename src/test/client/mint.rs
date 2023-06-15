@@ -1,11 +1,12 @@
 #[cfg(test)]
 mod mint_tests {
     use crate::client::RpcClient;
+    use crate::error::CosmosClientError;
     use cosmos_sdk_proto::cosmos::mint::v1beta1::Params;
     use std::str;
 
     #[tokio::test]
-    async fn params() -> Result<(), anyhow::Error> {
+    async fn params() -> Result<(), CosmosClientError> {
         let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
 
         let params = client.mint.params().await?;
@@ -24,7 +25,7 @@ mod mint_tests {
     }
 
     #[tokio::test]
-    async fn inflation() -> Result<(), anyhow::Error> {
+    async fn inflation() -> Result<(), CosmosClientError> {
         let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
 
         let inflation = client.mint.inflation().await?;
@@ -38,7 +39,7 @@ mod mint_tests {
     }
 
     #[tokio::test]
-    async fn annual_provisions() -> Result<(), anyhow::Error> {
+    async fn annual_provisions() -> Result<(), CosmosClientError> {
         let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
 
         let annual_provisions = client.mint.annual_provisions().await?;

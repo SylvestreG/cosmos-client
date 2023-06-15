@@ -1,3 +1,4 @@
+use crate::error::CosmosClientError;
 use cosmos_sdk_proto::cosmos::upgrade::v1beta1::{
     QueryAppliedPlanResponse, QueryCurrentPlanRequest, QueryCurrentPlanResponse,
     QueryModuleVersionsRequest, QueryModuleVersionsResponse, QueryUpgradedConsensusStateRequest,
@@ -16,7 +17,7 @@ impl UpgradeModule {
         UpgradeModule { rpc }
     }
 
-    pub async fn current_plan(&self) -> Result<QueryCurrentPlanResponse, anyhow::Error> {
+    pub async fn current_plan(&self) -> Result<QueryCurrentPlanResponse, CosmosClientError> {
         let query = QueryCurrentPlanRequest {};
         let query = self
             .rpc
@@ -36,7 +37,7 @@ impl UpgradeModule {
     pub async fn applied_plan(
         &self,
         height: i64,
-    ) -> Result<QueryAppliedPlanResponse, anyhow::Error> {
+    ) -> Result<QueryAppliedPlanResponse, CosmosClientError> {
         let query = QueryAppliedPlanResponse { height };
         let query = self
             .rpc
@@ -56,7 +57,7 @@ impl UpgradeModule {
     pub async fn upgrade_consensus_state(
         &self,
         last_height: i64,
-    ) -> Result<QueryUpgradedConsensusStateResponse, anyhow::Error> {
+    ) -> Result<QueryUpgradedConsensusStateResponse, CosmosClientError> {
         let query = QueryUpgradedConsensusStateRequest { last_height };
         let query = self
             .rpc
@@ -76,7 +77,7 @@ impl UpgradeModule {
     pub async fn module_versions(
         &self,
         module_name: &str,
-    ) -> Result<QueryModuleVersionsResponse, anyhow::Error> {
+    ) -> Result<QueryModuleVersionsResponse, CosmosClientError> {
         let query = QueryModuleVersionsRequest {
             module_name: module_name.to_string(),
         };

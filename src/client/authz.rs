@@ -1,3 +1,4 @@
+use crate::error::CosmosClientError;
 use cosmos_sdk_proto::cosmos::authz::v1beta1::{
     QueryGranteeGrantsRequest, QueryGranteeGrantsResponse, QueryGranterGrantsRequest,
     QueryGranterGrantsResponse, QueryGrantsRequest, QueryGrantsResponse,
@@ -22,7 +23,7 @@ impl AuthzModule {
         grantee: &str,
         msg_type_url: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryGrantsResponse, anyhow::Error> {
+    ) -> Result<QueryGrantsResponse, CosmosClientError> {
         let query = QueryGrantsRequest {
             granter: granter.to_string(),
             grantee: grantee.to_string(),
@@ -48,7 +49,7 @@ impl AuthzModule {
         &self,
         granter: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryGranterGrantsResponse, anyhow::Error> {
+    ) -> Result<QueryGranterGrantsResponse, CosmosClientError> {
         let query = QueryGranterGrantsRequest {
             granter: granter.to_string(),
             pagination,
@@ -72,7 +73,7 @@ impl AuthzModule {
         &self,
         grantee: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryGranteeGrantsResponse, anyhow::Error> {
+    ) -> Result<QueryGranteeGrantsResponse, CosmosClientError> {
         let query = QueryGranteeGrantsRequest {
             grantee: grantee.to_string(),
             pagination,

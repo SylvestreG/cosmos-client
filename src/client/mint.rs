@@ -1,3 +1,4 @@
+use crate::error::CosmosClientError;
 use cosmos_sdk_proto::cosmos::mint::v1beta1::{
     QueryAnnualProvisionsRequest, QueryAnnualProvisionsResponse, QueryInflationRequest,
     QueryInflationResponse, QueryParamsRequest, QueryParamsResponse,
@@ -15,7 +16,9 @@ impl MintModule {
         MintModule { rpc }
     }
 
-    pub async fn annual_provisions(&self) -> Result<QueryAnnualProvisionsResponse, anyhow::Error> {
+    pub async fn annual_provisions(
+        &self,
+    ) -> Result<QueryAnnualProvisionsResponse, CosmosClientError> {
         let query = QueryAnnualProvisionsRequest {};
         let query = self
             .rpc
@@ -32,7 +35,7 @@ impl MintModule {
         Ok(resp)
     }
 
-    pub async fn inflation(&self) -> Result<QueryInflationResponse, anyhow::Error> {
+    pub async fn inflation(&self) -> Result<QueryInflationResponse, CosmosClientError> {
         let query = QueryInflationRequest {};
         let query = self
             .rpc
@@ -49,7 +52,7 @@ impl MintModule {
         Ok(resp)
     }
 
-    pub async fn params(&self) -> Result<QueryParamsResponse, anyhow::Error> {
+    pub async fn params(&self) -> Result<QueryParamsResponse, CosmosClientError> {
         let query = QueryParamsRequest {};
         let query = self
             .rpc

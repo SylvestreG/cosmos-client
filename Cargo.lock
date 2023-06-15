@@ -213,7 +213,6 @@ checksum = "e496a50fda8aacccc86d7529e2c1e0892dbd0f898a6b5645b5561b89c3210efa"
 name = "cosmos-client"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "base64 0.21.0",
  "cosmos-sdk-proto",
  "cosmrs",
@@ -224,6 +223,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tendermint-rpc",
+ "thiserror",
  "tokio",
 ]
 

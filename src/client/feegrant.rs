@@ -1,3 +1,4 @@
+use crate::error::CosmosClientError;
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::feegrant::v1beta1::{
     QueryAllowanceRequest, QueryAllowanceResponse, QueryAllowancesRequest, QueryAllowancesResponse,
@@ -19,7 +20,7 @@ impl FeeGrantModule {
         &self,
         granter: &str,
         grantee: &str,
-    ) -> Result<QueryAllowanceResponse, anyhow::Error> {
+    ) -> Result<QueryAllowanceResponse, CosmosClientError> {
         let query = QueryAllowanceRequest {
             granter: granter.to_string(),
             grantee: grantee.to_string(),
@@ -43,7 +44,7 @@ impl FeeGrantModule {
         &self,
         grantee: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryAllowancesResponse, anyhow::Error> {
+    ) -> Result<QueryAllowancesResponse, CosmosClientError> {
         let query = QueryAllowancesRequest {
             grantee: grantee.to_string(),
             pagination,

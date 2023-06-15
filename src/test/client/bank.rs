@@ -1,10 +1,11 @@
 #[cfg(test)]
 mod bank_tests {
     use crate::client::RpcClient;
+    use crate::error::CosmosClientError;
     use cosmos_sdk_proto::cosmos::bank::v1beta1::DenomUnit;
 
     #[tokio::test]
-    async fn balances() -> Result<(), anyhow::Error> {
+    async fn balances() -> Result<(), CosmosClientError> {
         let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
 
         let balances = client
@@ -16,7 +17,7 @@ mod bank_tests {
     }
 
     #[tokio::test]
-    async fn balance_by_denom() -> Result<(), anyhow::Error> {
+    async fn balance_by_denom() -> Result<(), CosmosClientError> {
         let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
 
         let balance = client
@@ -29,7 +30,7 @@ mod bank_tests {
     }
 
     #[tokio::test]
-    async fn spendable_balances() -> Result<(), anyhow::Error> {
+    async fn spendable_balances() -> Result<(), CosmosClientError> {
         let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
 
         let balances = client
@@ -41,7 +42,7 @@ mod bank_tests {
     }
 
     #[tokio::test]
-    async fn supply() -> Result<(), anyhow::Error> {
+    async fn supply() -> Result<(), CosmosClientError> {
         let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
 
         let supply = client.bank.total_supply(None).await?;
@@ -50,7 +51,7 @@ mod bank_tests {
     }
 
     #[tokio::test]
-    async fn supply_by_denom() -> Result<(), anyhow::Error> {
+    async fn supply_by_denom() -> Result<(), CosmosClientError> {
         let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
 
         let supply = client.bank.supply_of("uxki").await?;
@@ -62,7 +63,7 @@ mod bank_tests {
     }
 
     #[tokio::test]
-    async fn params() -> Result<(), anyhow::Error> {
+    async fn params() -> Result<(), CosmosClientError> {
         let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
 
         let params = client.bank.params().await?;
@@ -72,7 +73,7 @@ mod bank_tests {
     }
 
     #[tokio::test]
-    async fn metadata_by_denom() -> Result<(), anyhow::Error> {
+    async fn metadata_by_denom() -> Result<(), CosmosClientError> {
         let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
 
         let metadata = client.bank.denom_metadata("uxki").await?;
@@ -116,7 +117,7 @@ mod bank_tests {
     }
 
     #[tokio::test]
-    async fn metadata() -> Result<(), anyhow::Error> {
+    async fn metadata() -> Result<(), CosmosClientError> {
         let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
 
         let metadata = client.bank.denoms_metadata(None).await?;

@@ -1,3 +1,4 @@
+use crate::error::CosmosClientError;
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::evidence::v1beta1::{
     QueryAllEvidenceRequest, QueryAllEvidenceResponse, QueryEvidenceRequest, QueryEvidenceResponse,
@@ -18,7 +19,7 @@ impl EvidenceModule {
     pub async fn evidence(
         &self,
         evidence_hash: Vec<u8>,
-    ) -> Result<QueryEvidenceResponse, anyhow::Error> {
+    ) -> Result<QueryEvidenceResponse, CosmosClientError> {
         let query = QueryEvidenceRequest { evidence_hash };
         let query = self
             .rpc
@@ -38,7 +39,7 @@ impl EvidenceModule {
     pub async fn all_evidence(
         &self,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryAllEvidenceResponse, anyhow::Error> {
+    ) -> Result<QueryAllEvidenceResponse, CosmosClientError> {
         let query = QueryAllEvidenceRequest { pagination };
         let query = self
             .rpc

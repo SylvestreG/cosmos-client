@@ -2,9 +2,10 @@
 mod auth_tests {
     use crate::client::any_helper::{any_to_cosmos, CosmosType};
     use crate::client::RpcClient;
+    use crate::error::CosmosClientError;
 
     #[tokio::test]
-    async fn accounts() -> Result<(), anyhow::Error> {
+    async fn accounts() -> Result<(), CosmosClientError> {
         let client = RpcClient::new("https://rpc-challenge.blockchain.ki")?;
         let accounts = client.auth.accounts(None).await?;
 
@@ -14,7 +15,7 @@ mod auth_tests {
     }
 
     #[tokio::test]
-    async fn account() -> Result<(), anyhow::Error> {
+    async fn account() -> Result<(), CosmosClientError> {
         let client = RpcClient::new("https://rpc-challenge.blockchain.ki")?;
         let account = client
             .auth
@@ -40,7 +41,7 @@ mod auth_tests {
     }
 
     #[tokio::test]
-    async fn params() -> Result<(), anyhow::Error> {
+    async fn params() -> Result<(), CosmosClientError> {
         let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
         let params = client.auth.params().await?;
 

@@ -2,11 +2,12 @@
 mod feegrant_tests {
     use crate::client::any_helper::{any_to_cosmos, CosmosType};
     use crate::client::RpcClient;
+    use crate::error::CosmosClientError;
     use cosmos_sdk_proto::cosmos::base::v1beta1::Coin;
     use std::str::FromStr;
 
     #[tokio::test]
-    async fn allowance() -> Result<(), anyhow::Error> {
+    async fn allowance() -> Result<(), CosmosClientError> {
         let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
 
         let allowance = client

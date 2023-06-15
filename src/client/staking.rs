@@ -1,3 +1,4 @@
+use crate::error::CosmosClientError;
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::staking::v1beta1::{
     QueryDelegationRequest, QueryDelegationResponse, QueryDelegatorDelegationsRequest,
@@ -27,7 +28,7 @@ impl StakingModule {
     pub async fn validator(
         &self,
         validator_addr: &str,
-    ) -> Result<QueryValidatorResponse, anyhow::Error> {
+    ) -> Result<QueryValidatorResponse, CosmosClientError> {
         let query = QueryValidatorRequest {
             validator_addr: validator_addr.to_string(),
         };
@@ -50,7 +51,7 @@ impl StakingModule {
         &self,
         status: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryValidatorsResponse, anyhow::Error> {
+    ) -> Result<QueryValidatorsResponse, CosmosClientError> {
         let query = QueryValidatorsRequest {
             status: status.to_string(),
             pagination,
@@ -74,7 +75,7 @@ impl StakingModule {
         &self,
         validator_addr: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryValidatorDelegationsResponse, anyhow::Error> {
+    ) -> Result<QueryValidatorDelegationsResponse, CosmosClientError> {
         let query = QueryValidatorDelegationsRequest {
             validator_addr: validator_addr.to_string(),
             pagination,
@@ -98,7 +99,7 @@ impl StakingModule {
         &self,
         validator_addr: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryValidatorUnbondingDelegationsResponse, anyhow::Error> {
+    ) -> Result<QueryValidatorUnbondingDelegationsResponse, CosmosClientError> {
         let query = QueryValidatorUnbondingDelegationsRequest {
             validator_addr: validator_addr.to_string(),
             pagination,
@@ -122,7 +123,7 @@ impl StakingModule {
         &self,
         delegator_addr: &str,
         validator_addr: &str,
-    ) -> Result<QueryDelegationResponse, anyhow::Error> {
+    ) -> Result<QueryDelegationResponse, CosmosClientError> {
         let query = QueryDelegationRequest {
             delegator_addr: delegator_addr.to_string(),
             validator_addr: validator_addr.to_string(),
@@ -146,7 +147,7 @@ impl StakingModule {
         &self,
         delegator_addr: &str,
         validator_addr: &str,
-    ) -> Result<QueryUnbondingDelegationResponse, anyhow::Error> {
+    ) -> Result<QueryUnbondingDelegationResponse, CosmosClientError> {
         let query = QueryUnbondingDelegationRequest {
             delegator_addr: delegator_addr.to_string(),
             validator_addr: validator_addr.to_string(),
@@ -170,7 +171,7 @@ impl StakingModule {
         &self,
         delegator_addr: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryDelegatorDelegationsResponse, anyhow::Error> {
+    ) -> Result<QueryDelegatorDelegationsResponse, CosmosClientError> {
         let query = QueryDelegatorDelegationsRequest {
             delegator_addr: delegator_addr.to_string(),
             pagination,
@@ -194,7 +195,7 @@ impl StakingModule {
         &self,
         delegator_addr: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryDelegatorUnbondingDelegationsResponse, anyhow::Error> {
+    ) -> Result<QueryDelegatorUnbondingDelegationsResponse, CosmosClientError> {
         let query = QueryDelegatorUnbondingDelegationsRequest {
             delegator_addr: delegator_addr.to_string(),
             pagination,
@@ -220,7 +221,7 @@ impl StakingModule {
         src_validator_addr: &str,
         dst_validator_addr: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryRedelegationsResponse, anyhow::Error> {
+    ) -> Result<QueryRedelegationsResponse, CosmosClientError> {
         let query = QueryRedelegationsRequest {
             delegator_addr: delegator_addr.to_string(),
             src_validator_addr: src_validator_addr.to_string(),
@@ -246,7 +247,7 @@ impl StakingModule {
         &self,
         delegator_addr: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryDelegatorDelegationsResponse, anyhow::Error> {
+    ) -> Result<QueryDelegatorDelegationsResponse, CosmosClientError> {
         let query = QueryDelegatorDelegationsRequest {
             delegator_addr: delegator_addr.to_string(),
             pagination,
@@ -270,7 +271,7 @@ impl StakingModule {
         &self,
         delegator_addr: &str,
         validator_addr: &str,
-    ) -> Result<QueryDelegatorValidatorResponse, anyhow::Error> {
+    ) -> Result<QueryDelegatorValidatorResponse, CosmosClientError> {
         let query = QueryDelegatorValidatorRequest {
             delegator_addr: delegator_addr.to_string(),
             validator_addr: validator_addr.to_string(),
@@ -293,7 +294,7 @@ impl StakingModule {
     pub async fn historical_info(
         &self,
         height: i64,
-    ) -> Result<QueryHistoricalInfoResponse, anyhow::Error> {
+    ) -> Result<QueryHistoricalInfoResponse, CosmosClientError> {
         let query = QueryHistoricalInfoRequest { height };
         let query = self
             .rpc
@@ -310,7 +311,7 @@ impl StakingModule {
         Ok(resp)
     }
 
-    pub async fn pool(&self) -> Result<QueryPoolResponse, anyhow::Error> {
+    pub async fn pool(&self) -> Result<QueryPoolResponse, CosmosClientError> {
         let query = QueryPoolRequest {};
         let query = self
             .rpc
@@ -327,7 +328,7 @@ impl StakingModule {
         Ok(resp)
     }
 
-    pub async fn params(&self) -> Result<QueryParamsResponse, anyhow::Error> {
+    pub async fn params(&self) -> Result<QueryParamsResponse, CosmosClientError> {
         let query = QueryParamsRequest {};
         let query = self
             .rpc

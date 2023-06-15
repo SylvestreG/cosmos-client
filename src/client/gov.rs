@@ -1,3 +1,4 @@
+use crate::error::CosmosClientError;
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::gov::v1beta1::{
     QueryDepositRequest, QueryDepositResponse, QueryDepositsRequest, QueryDepositsResponse,
@@ -19,7 +20,10 @@ impl GovModule {
         GovModule { rpc }
     }
 
-    pub async fn proposal(&self, proposal_id: u64) -> Result<QueryProposalResponse, anyhow::Error> {
+    pub async fn proposal(
+        &self,
+        proposal_id: u64,
+    ) -> Result<QueryProposalResponse, CosmosClientError> {
         let query = QueryProposalRequest { proposal_id };
         let query = self
             .rpc
@@ -42,7 +46,7 @@ impl GovModule {
         voter: &str,
         depositor: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryProposalsResponse, anyhow::Error> {
+    ) -> Result<QueryProposalsResponse, CosmosClientError> {
         let query = QueryProposalsRequest {
             proposal_status,
             voter: voter.to_string(),
@@ -68,7 +72,7 @@ impl GovModule {
         &self,
         proposal_id: u64,
         voter: &str,
-    ) -> Result<QueryVoteResponse, anyhow::Error> {
+    ) -> Result<QueryVoteResponse, CosmosClientError> {
         let query = QueryVoteRequest {
             proposal_id,
             voter: voter.to_string(),
@@ -92,7 +96,7 @@ impl GovModule {
         &self,
         proposal_id: u64,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryVotesResponse, anyhow::Error> {
+    ) -> Result<QueryVotesResponse, CosmosClientError> {
         let query = QueryVotesRequest {
             proposal_id,
             pagination,
@@ -112,7 +116,10 @@ impl GovModule {
         Ok(resp)
     }
 
-    pub async fn params(&self, params_type: &str) -> Result<QueryParamsResponse, anyhow::Error> {
+    pub async fn params(
+        &self,
+        params_type: &str,
+    ) -> Result<QueryParamsResponse, CosmosClientError> {
         let query = QueryParamsRequest {
             params_type: params_type.to_string(),
         };
@@ -135,7 +142,7 @@ impl GovModule {
         &self,
         proposal_id: u64,
         depositor: &str,
-    ) -> Result<QueryDepositResponse, anyhow::Error> {
+    ) -> Result<QueryDepositResponse, CosmosClientError> {
         let query = QueryDepositRequest {
             proposal_id,
             depositor: depositor.to_string(),
@@ -159,7 +166,7 @@ impl GovModule {
         &self,
         proposal_id: u64,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryDepositsResponse, anyhow::Error> {
+    ) -> Result<QueryDepositsResponse, CosmosClientError> {
         let query = QueryDepositsRequest {
             proposal_id,
             pagination,
@@ -182,7 +189,7 @@ impl GovModule {
     pub async fn tally_result(
         &self,
         proposal_id: u64,
-    ) -> Result<QueryTallyResultResponse, anyhow::Error> {
+    ) -> Result<QueryTallyResultResponse, CosmosClientError> {
         let query = QueryTallyResultRequest { proposal_id };
         let query = self
             .rpc

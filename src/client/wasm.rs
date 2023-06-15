@@ -1,3 +1,4 @@
+use crate::error::CosmosClientError;
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmwasm::wasm::v1::{
     QueryAllContractStateRequest, QueryAllContractStateResponse, QueryCodeRequest,
@@ -5,7 +6,7 @@ use cosmos_sdk_proto::cosmwasm::wasm::v1::{
     QueryContractHistoryResponse, QueryContractInfoRequest, QueryContractInfoResponse,
     QueryContractsByCodeRequest, QueryContractsByCodeResponse, QueryPinnedCodesRequest,
     QueryPinnedCodesResponse, QueryRawContractStateRequest, QueryRawContractStateResponse,
-    QuerySmartContractStateRequest, QuerySmartContractStateResponse,
+    QuerySmartContractStateRequest,
 };
 use prost::Message;
 use serde::de::DeserializeOwned;
@@ -25,7 +26,7 @@ impl WasmModule {
     pub async fn contract_info(
         &self,
         address: &str,
-    ) -> Result<QueryContractInfoResponse, anyhow::Error> {
+    ) -> Result<QueryContractInfoResponse, CosmosClientError> {
         let query = QueryContractInfoRequest {
             address: address.to_string(),
         };
@@ -48,7 +49,7 @@ impl WasmModule {
         &self,
         address: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryContractHistoryResponse, anyhow::Error> {
+    ) -> Result<QueryContractHistoryResponse, CosmosClientError> {
         let query = QueryContractHistoryRequest {
             address: address.to_string(),
             pagination,
@@ -72,7 +73,7 @@ impl WasmModule {
         &self,
         code_id: u64,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryContractsByCodeResponse, anyhow::Error> {
+    ) -> Result<QueryContractsByCodeResponse, CosmosClientError> {
         let query = QueryContractsByCodeRequest {
             code_id,
             pagination,
@@ -96,7 +97,7 @@ impl WasmModule {
         &self,
         address: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryAllContractStateResponse, anyhow::Error> {
+    ) -> Result<QueryAllContractStateResponse, CosmosClientError> {
         let query = QueryAllContractStateRequest {
             address: address.to_string(),
             pagination,
@@ -120,7 +121,7 @@ impl WasmModule {
         &self,
         address: &str,
         query_data: Vec<u8>,
-    ) -> Result<QueryRawContractStateResponse, anyhow::Error> {
+    ) -> Result<QueryRawContractStateResponse, CosmosClientError> {
         let query = QueryRawContractStateRequest {
             address: address.to_string(),
             query_data,
@@ -144,7 +145,7 @@ impl WasmModule {
         &self,
         address: &str,
         msg: T,
-    ) -> Result<U, anyhow::Error> {
+    ) -> Result<U, CosmosClientError> {
         let query = QuerySmartContractStateRequest {
             address: address.to_string(),
             query_data: serde_json::to_vec(&msg)?,
@@ -163,10 +164,10 @@ impl WasmModule {
         let resp: QueryRawContractStateResponse =
             QueryRawContractStateResponse::decode(ret.value.as_slice())?;
         println!("{:#?}", ret);
-        Ok(serde_json::from_slice::<U>(&resp.data.as_slice())?)
+        Ok(serde_json::from_slice::<U>(resp.data.as_slice())?)
     }
 
-    pub async fn code(&self, code_id: u64) -> Result<QueryCodeResponse, anyhow::Error> {
+    pub async fn code(&self, code_id: u64) -> Result<QueryCodeResponse, CosmosClientError> {
         let query = QueryCodeRequest { code_id };
         let query = self
             .rpc
@@ -186,7 +187,7 @@ impl WasmModule {
     pub async fn codes(
         &self,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryCodesResponse, anyhow::Error> {
+    ) -> Result<QueryCodesResponse, CosmosClientError> {
         let query = QueryCodesRequest { pagination };
         let query = self
             .rpc
@@ -206,7 +207,7 @@ impl WasmModule {
     pub async fn pinned_codes(
         &self,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryPinnedCodesResponse, anyhow::Error> {
+    ) -> Result<QueryPinnedCodesResponse, CosmosClientError> {
         let query = QueryPinnedCodesRequest { pagination };
         let query = self
             .rpc

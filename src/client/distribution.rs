@@ -1,3 +1,4 @@
+use crate::error::CosmosClientError;
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::distribution::v1beta1::{
     QueryCommunityPoolRequest, QueryCommunityPoolResponse, QueryDelegationTotalRewardsRequest,
@@ -22,7 +23,7 @@ impl DistributionModule {
         DistributionModule { rpc }
     }
 
-    pub async fn params(&self) -> Result<QueryParamsResponse, anyhow::Error> {
+    pub async fn params(&self) -> Result<QueryParamsResponse, CosmosClientError> {
         let query = QueryParamsRequest {};
         let query = self
             .rpc
@@ -42,7 +43,7 @@ impl DistributionModule {
     pub async fn validator_outstanding_rewards(
         &self,
         validator_address: &str,
-    ) -> Result<QueryValidatorOutstandingRewardsResponse, anyhow::Error> {
+    ) -> Result<QueryValidatorOutstandingRewardsResponse, CosmosClientError> {
         let query = QueryValidatorOutstandingRewardsRequest {
             validator_address: validator_address.to_string(),
         };
@@ -64,7 +65,7 @@ impl DistributionModule {
     pub async fn validator_commission(
         &self,
         validator_address: &str,
-    ) -> Result<QueryValidatorCommissionResponse, anyhow::Error> {
+    ) -> Result<QueryValidatorCommissionResponse, CosmosClientError> {
         let query = QueryValidatorCommissionRequest {
             validator_address: validator_address.to_string(),
         };
@@ -89,7 +90,7 @@ impl DistributionModule {
         starting_height: u64,
         ending_height: u64,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryValidatorSlashesResponse, anyhow::Error> {
+    ) -> Result<QueryValidatorSlashesResponse, CosmosClientError> {
         let query = QueryValidatorSlashesRequest {
             validator_address: validator_address.to_string(),
             starting_height,
@@ -115,7 +116,7 @@ impl DistributionModule {
         &self,
         delegator_addr: &str,
         validator_addr: &str,
-    ) -> Result<QueryDelegationResponse, anyhow::Error> {
+    ) -> Result<QueryDelegationResponse, CosmosClientError> {
         let query = QueryDelegationRequest {
             delegator_addr: delegator_addr.to_string(),
             validator_addr: validator_addr.to_string(),
@@ -138,7 +139,7 @@ impl DistributionModule {
     pub async fn delegation_total_rewards(
         &self,
         delegator_address: &str,
-    ) -> Result<QueryDelegationTotalRewardsResponse, anyhow::Error> {
+    ) -> Result<QueryDelegationTotalRewardsResponse, CosmosClientError> {
         let query = QueryDelegationTotalRewardsRequest {
             delegator_address: delegator_address.to_string(),
         };
@@ -160,7 +161,7 @@ impl DistributionModule {
     pub async fn delegator_validators(
         &self,
         delegator_addr: &str,
-    ) -> Result<QueryDelegatorValidatorsResponse, anyhow::Error> {
+    ) -> Result<QueryDelegatorValidatorsResponse, CosmosClientError> {
         let query = QueryDelegatorValidatorsRequest {
             delegator_address: delegator_addr.to_string(),
         };
@@ -182,7 +183,7 @@ impl DistributionModule {
     pub async fn delegator_withdraw_address(
         &self,
         delegator_addr: &str,
-    ) -> Result<QueryDelegatorWithdrawAddressResponse, anyhow::Error> {
+    ) -> Result<QueryDelegatorWithdrawAddressResponse, CosmosClientError> {
         let query = QueryDelegatorWithdrawAddressRequest {
             delegator_address: delegator_addr.to_string(),
         };
@@ -201,7 +202,7 @@ impl DistributionModule {
         Ok(resp)
     }
 
-    pub async fn community_pool(&self) -> Result<QueryCommunityPoolResponse, anyhow::Error> {
+    pub async fn community_pool(&self) -> Result<QueryCommunityPoolResponse, CosmosClientError> {
         let query = QueryCommunityPoolRequest {};
         let query = self
             .rpc

@@ -1,3 +1,4 @@
+use crate::error::CosmosClientError;
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::slashing::v1beta1::{
     QueryParamsRequest, QueryParamsResponse, QuerySigningInfoRequest, QuerySigningInfoResponse,
@@ -16,7 +17,7 @@ impl SlashingModule {
         SlashingModule { rpc }
     }
 
-    pub async fn params(&self) -> Result<QueryParamsResponse, anyhow::Error> {
+    pub async fn params(&self) -> Result<QueryParamsResponse, CosmosClientError> {
         let query = QueryParamsRequest {};
         let query = self
             .rpc
@@ -36,7 +37,7 @@ impl SlashingModule {
     pub async fn signing_info(
         &self,
         cons_address: &str,
-    ) -> Result<QuerySigningInfoResponse, anyhow::Error> {
+    ) -> Result<QuerySigningInfoResponse, CosmosClientError> {
         let query = QuerySigningInfoRequest {
             cons_address: cons_address.to_string(),
         };
@@ -58,7 +59,7 @@ impl SlashingModule {
     pub async fn signing_infos(
         &self,
         pagination: Option<PageRequest>,
-    ) -> Result<QuerySigningInfosResponse, anyhow::Error> {
+    ) -> Result<QuerySigningInfosResponse, CosmosClientError> {
         let query = QuerySigningInfosRequest { pagination };
         let query = self
             .rpc

@@ -1,3 +1,4 @@
+use crate::error::CosmosClientError;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::{
     QueryAccountRequest, QueryAccountResponse, QueryAccountsRequest, QueryAccountsResponse,
     QueryParamsRequest, QueryParamsResponse,
@@ -19,7 +20,7 @@ impl AuthModule {
     pub async fn accounts(
         &self,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryAccountsResponse, anyhow::Error> {
+    ) -> Result<QueryAccountsResponse, CosmosClientError> {
         let query = QueryAccountsRequest { pagination };
         let query = self
             .rpc
@@ -36,7 +37,7 @@ impl AuthModule {
         Ok(resp)
     }
 
-    pub async fn account(&self, address: &str) -> Result<QueryAccountResponse, anyhow::Error> {
+    pub async fn account(&self, address: &str) -> Result<QueryAccountResponse, CosmosClientError> {
         let query = QueryAccountRequest {
             address: address.to_string(),
         };
@@ -55,7 +56,7 @@ impl AuthModule {
         Ok(resp)
     }
 
-    pub async fn params(&self) -> Result<QueryParamsResponse, anyhow::Error> {
+    pub async fn params(&self) -> Result<QueryParamsResponse, CosmosClientError> {
         let query = QueryParamsRequest {};
         let query = self
             .rpc

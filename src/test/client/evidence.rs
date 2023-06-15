@@ -2,10 +2,11 @@
 mod evidence_tests {
     use crate::client::any_helper::{any_to_cosmos, CosmosType};
     use crate::client::RpcClient;
+    use crate::error::CosmosClientError;
     use std::str::FromStr;
 
     #[tokio::test]
-    async fn evidence() -> Result<(), anyhow::Error> {
+    async fn evidence() -> Result<(), CosmosClientError> {
         let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
 
         let evidence = client.evidence.all_evidence(None).await?;

@@ -1,3 +1,4 @@
+use crate::error::CosmosClientError;
 use cosmos_sdk_proto::cosmos::params::v1beta1::{QueryParamsRequest, QueryParamsResponse};
 use prost::Message;
 use std::rc::Rc;
@@ -16,7 +17,7 @@ impl ParamsModule {
         &self,
         subspace: &str,
         key: &str,
-    ) -> Result<QueryParamsResponse, anyhow::Error> {
+    ) -> Result<QueryParamsResponse, CosmosClientError> {
         let query = QueryParamsRequest {
             subspace: subspace.to_string(),
             key: key.to_string(),

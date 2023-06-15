@@ -1,14 +1,87 @@
+use crate::client::any_helper::{any_to_cosmos, CosmosType};
+use crate::client::RpcClient;
+use crate::error::CosmosClientError;
 use cosmrs::bip32::{Language, Mnemonic, XPrv};
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::crypto::PublicKey;
-use cosmrs::AccountId;
+use cosmrs::tendermint::chain;
+use cosmrs::tx::{BodyBuilder, SignDoc, SignerInfo};
+use cosmrs::{tx, AccountId, Coin};
+use prost_types::Any;
 use rand_core::OsRng;
+use std::str::FromStr;
 
 pub struct Signer {
     mnemonic: Option<String>,
+    denom: String,
     public_address: AccountId,
-    _private_key: SigningKey,
-    _public_key: PublicKey,
+    private_key: SigningKey,
+    public_key: PublicKey,
+}
+
+pub struct CosmosTx {
+    tx: cosmrs::tx::BodyBuilder,
+}
+
+impl CosmosTx {
+    pub fn build() -> Self {
+        CosmosTx {
+            tx: BodyBuilder::new(),
+        }
+    }
+
+    pub fn memo(mut self, memo: String) -> Self {
+        self.tx.memo(memo);
+        self
+    }
+
+    pub fn add_msg(mut self, msg: Any) -> Self {
+        self.tx.msg(msg);
+        self
+    }
+
+    pub async fn sign(
+        &mut self,
+        signer: Signer,
+        mut client: RpcClient,
+    ) -> Result<Vec<u8>, CosmosClientError> {
+        let account = client
+            .auth
+            .account(signer.public_address.to_string().as_str())
+            .await?;
+        println!("{:#?}", account);
+
+        if let Some(account) = account.account {
+            if let Ok(CosmosType::BaseAccount(account)) = any_to_cosmos(&account) {
+                let tx_body = self.tx.finish();
+                let auth_info =
+                    SignerInfo::single_direct(Some(signer.public_key), account.sequence).auth_info(
+                        tx::Fee::from_amount_and_gas(
+                            Coin {
+                                amount: 2500u128,
+                                denom: signer.denom.parse().unwrap(),
+                            },
+                            100u64,
+                        ),
+                    );
+                let sign_doc = SignDoc::new(
+                    &tx_body,
+                    &auth_info,
+                    &chain::Id::from_str(client.chain_id().await?.as_str())?,
+                    account.account_number,
+                )
+                .unwrap();
+                let tx_raw = sign_doc.sign(&signer.private_key).unwrap();
+                let _tx = client.tx.simulate(tx_raw.to_bytes().unwrap()).await?;
+            }
+        } else {
+            return Err(CosmosClientError::AccountDoesNotExistOnChain {
+                address: signer.get_address(),
+            });
+        }
+
+        Ok(vec![])
+    }
 }
 
 impl Signer {
@@ -16,7 +89,7 @@ impl Signer {
         phrase: &str,
         prefix: &str,
         derivation: Option<&str>,
-    ) -> Result<(SigningKey, PublicKey, AccountId), anyhow::Error> {
+    ) -> Result<(SigningKey, PublicKey, AccountId), CosmosClientError> {
         let derivation = if let Some(derivation) = derivation {
             derivation
         } else {
@@ -34,35 +107,37 @@ impl Signer {
 
     pub fn generate(
         prefix: &str,
-        _denom: &str,
+        denom: &str,
         derivation: Option<&str>,
-    ) -> Result<Self, anyhow::Error> {
+    ) -> Result<Self, CosmosClientError> {
         let mnemonic = Mnemonic::random(OsRng, Language::English);
-        let (_private_key, _public_key, public_address) =
+        let (private_key, public_key, public_address) =
             Signer::load_from_mnemonic(mnemonic.phrase(), prefix, derivation)?;
 
         Ok(Signer {
             mnemonic: Some(mnemonic.phrase().to_string()),
             public_address,
-            _private_key,
-            _public_key,
+            denom: denom.to_string(),
+            private_key,
+            public_key,
         })
     }
 
     pub fn from_mnemonic(
         phrase: &str,
         prefix: &str,
-        _denom: &str,
+        denom: &str,
         derivation: Option<&str>,
-    ) -> Result<Self, anyhow::Error> {
-        let (_private_key, _public_key, public_address) =
+    ) -> Result<Self, CosmosClientError> {
+        let (private_key, public_key, public_address) =
             Signer::load_from_mnemonic(phrase, prefix, derivation)?;
 
         Ok(Signer {
             mnemonic: Some(phrase.to_string()),
             public_address,
-            _private_key,
-            _public_key,
+            denom: denom.to_string(),
+            private_key,
+            public_key,
         })
     }
 
@@ -72,5 +147,9 @@ impl Signer {
 
     pub fn get_phrase(&self) -> Option<String> {
         self.mnemonic.clone()
+    }
+
+    pub fn get_denom(&self) -> String {
+        self.denom.clone()
     }
 }

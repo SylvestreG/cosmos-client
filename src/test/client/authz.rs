@@ -1,10 +1,11 @@
 #[cfg(test)]
 mod authz_tests {
     use crate::client::RpcClient;
+    use crate::error::CosmosClientError;
     use std::str::FromStr;
 
     #[tokio::test]
-    async fn grantee() -> Result<(), anyhow::Error> {
+    async fn grantee() -> Result<(), CosmosClientError> {
         let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
 
         let grants = client
@@ -28,7 +29,7 @@ mod authz_tests {
     }
 
     #[tokio::test]
-    async fn granter() -> Result<(), anyhow::Error> {
+    async fn granter() -> Result<(), CosmosClientError> {
         let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
 
         let grants = client

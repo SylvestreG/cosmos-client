@@ -1,9 +1,10 @@
+use crate::error::CosmosClientError;
 use cosmos_sdk_proto::cosmos::bank::v1beta1::{
-    QueryAllBalancesRequest, QueryAllBalancesResponse, QueryBalanceRequest, QueryBalanceResponse,
-    QueryDenomMetadataRequest, QueryDenomMetadataResponse, QueryDenomsMetadataRequest,
-    QueryDenomsMetadataResponse, QueryParamsRequest, QueryParamsResponse,
-    QuerySpendableBalancesRequest, QuerySpendableBalancesResponse, QuerySupplyOfRequest,
-    QuerySupplyOfResponse, QueryTotalSupplyRequest, QueryTotalSupplyResponse,
+    MsgSend, QueryAllBalancesRequest, QueryAllBalancesResponse, QueryBalanceRequest,
+    QueryBalanceResponse, QueryDenomMetadataRequest, QueryDenomMetadataResponse,
+    QueryDenomsMetadataRequest, QueryDenomsMetadataResponse, QueryParamsRequest,
+    QueryParamsResponse, QuerySpendableBalancesRequest, QuerySpendableBalancesResponse,
+    QuerySupplyOfRequest, QuerySupplyOfResponse, QueryTotalSupplyRequest, QueryTotalSupplyResponse,
 };
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use prost::Message;
@@ -23,7 +24,7 @@ impl BankModule {
         &self,
         address: &str,
         denom: &str,
-    ) -> Result<QueryBalanceResponse, anyhow::Error> {
+    ) -> Result<QueryBalanceResponse, CosmosClientError> {
         let query = QueryBalanceRequest {
             address: address.to_string(),
             denom: denom.to_string(),
@@ -47,7 +48,7 @@ impl BankModule {
         &self,
         address: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryAllBalancesResponse, anyhow::Error> {
+    ) -> Result<QueryAllBalancesResponse, CosmosClientError> {
         let query = QueryAllBalancesRequest {
             address: address.to_string(),
             pagination,
@@ -71,7 +72,7 @@ impl BankModule {
         &self,
         address: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QuerySpendableBalancesResponse, anyhow::Error> {
+    ) -> Result<QuerySpendableBalancesResponse, CosmosClientError> {
         let query = QuerySpendableBalancesRequest {
             address: address.to_string(),
             pagination,
@@ -94,7 +95,7 @@ impl BankModule {
     pub async fn total_supply(
         &self,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryTotalSupplyResponse, anyhow::Error> {
+    ) -> Result<QueryTotalSupplyResponse, CosmosClientError> {
         let query = QueryTotalSupplyRequest { pagination };
         let query = self
             .rpc
@@ -111,7 +112,7 @@ impl BankModule {
         Ok(resp)
     }
 
-    pub async fn supply_of(&self, denom: &str) -> Result<QuerySupplyOfResponse, anyhow::Error> {
+    pub async fn supply_of(&self, denom: &str) -> Result<QuerySupplyOfResponse, CosmosClientError> {
         let query = QuerySupplyOfRequest {
             denom: denom.to_string(),
         };
@@ -130,7 +131,7 @@ impl BankModule {
         Ok(resp)
     }
 
-    pub async fn params(&self) -> Result<QueryParamsResponse, anyhow::Error> {
+    pub async fn params(&self) -> Result<QueryParamsResponse, CosmosClientError> {
         let query = QueryParamsRequest {};
         let query = self
             .rpc
@@ -150,7 +151,7 @@ impl BankModule {
     pub async fn denom_metadata(
         &self,
         denom: &str,
-    ) -> Result<QueryDenomMetadataResponse, anyhow::Error> {
+    ) -> Result<QueryDenomMetadataResponse, CosmosClientError> {
         let query = QueryDenomMetadataRequest {
             denom: denom.to_string(),
         };
@@ -172,7 +173,7 @@ impl BankModule {
     pub async fn denoms_metadata(
         &self,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryDenomsMetadataResponse, anyhow::Error> {
+    ) -> Result<QueryDenomsMetadataResponse, CosmosClientError> {
         let query = QueryDenomsMetadataRequest { pagination };
         let query = self
             .rpc
@@ -187,5 +188,13 @@ impl BankModule {
 
         let resp = QueryDenomsMetadataResponse::decode(query.value.as_slice())?;
         Ok(resp)
+    }
+
+    pub fn msg_send_payload(from: &str, to: &str) -> Vec<u8> {
+        MsgSend::encode_to_vec(&MsgSend {
+            from_address: from.to_string(),
+            to_address: to.to_string(),
+            amount: vec![],
+        })
     }
 }
