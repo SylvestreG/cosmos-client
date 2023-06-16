@@ -1,13 +1,12 @@
+use cosmrs::ErrorReport;
+use hex::FromHexError;
 use prost::DecodeError;
+use std::io;
 use std::str::Utf8Error;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum CosmosClientError {
-    #[error("Unknown cosmos-sdk Msg")]
-    UnknownCosmosMsg(),
-    #[error("Account does not exist {address:?}")]
-    AccountDoesNotExistOnChain { address: String },
     #[error("Tendermint RPC Error")]
     TendermintRpcError(#[from] tendermint_rpc::Error),
     #[error("Decode Error")]
@@ -22,4 +21,15 @@ pub enum CosmosClientError {
     TimestampError(#[from] prost_types::TimestampError),
     #[error("Utf8 Error")]
     Utf8Error(#[from] Utf8Error),
+    #[error("Utf8 Error")]
+    IoError(#[from] io::Error),
+    #[error("ErrorReport")]
+    ErrorReport(#[from] ErrorReport),
+    #[error("FromHexError")]
+    FromHexError(#[from] FromHexError),
+
+    #[error("Unknown cosmos-sdk Msg")]
+    UnknownCosmosMsg(),
+    #[error("Account does not exist {address:?}")]
+    AccountDoesNotExistOnChain { address: String },
 }

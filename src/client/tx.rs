@@ -19,7 +19,7 @@ impl TxModule {
             tx: None,
             tx_bytes: payload,
         };
-        println!("in {:#?}", query);
+
         let query = self
             .rpc
             .abci_query(
@@ -32,7 +32,7 @@ impl TxModule {
             .unwrap();
 
         let resp = SimulateResponse::decode(query.value.as_slice())?;
-        println!("out {:#?}", resp);
+
         Ok(resp)
     }
 }

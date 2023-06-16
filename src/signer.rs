@@ -7,6 +7,7 @@ use cosmrs::crypto::PublicKey;
 use cosmrs::tendermint::chain;
 use cosmrs::tx::{BodyBuilder, SignDoc, SignerInfo};
 use cosmrs::{tx, AccountId, Coin};
+use hex::decode;
 use prost_types::Any;
 use rand_core::OsRng;
 use std::str::FromStr;
@@ -20,7 +21,7 @@ pub struct Signer {
 }
 
 pub struct CosmosTx {
-    tx: cosmrs::tx::BodyBuilder,
+    tx: BodyBuilder,
 }
 
 impl CosmosTx {
@@ -30,8 +31,8 @@ impl CosmosTx {
         }
     }
 
-    pub fn memo(mut self, memo: String) -> Self {
-        self.tx.memo(memo);
+    pub fn memo(mut self, memo: &str) -> Self {
+        self.tx.memo(memo.to_string());
         self
     }
 
@@ -49,7 +50,6 @@ impl CosmosTx {
             .auth
             .account(signer.public_address.to_string().as_str())
             .await?;
-        println!("{:#?}", account);
 
         if let Some(account) = account.account {
             if let Ok(CosmosType::BaseAccount(account)) = any_to_cosmos(&account) {
@@ -116,6 +116,24 @@ impl Signer {
 
         Ok(Signer {
             mnemonic: Some(mnemonic.phrase().to_string()),
+            public_address,
+            denom: denom.to_string(),
+            private_key,
+            public_key,
+        })
+    }
+
+    pub fn from_pkey(
+        private_key: &str,
+        prefix: &str,
+        denom: &str,
+    ) -> Result<Self, CosmosClientError> {
+        let private_key = SigningKey::from_slice(decode(private_key)?.as_slice())?;
+        let public_key = private_key.public_key();
+        let public_address = public_key.account_id(prefix).unwrap();
+
+        Ok(Signer {
+            mnemonic: None,
             public_address,
             denom: denom.to_string(),
             private_key,
