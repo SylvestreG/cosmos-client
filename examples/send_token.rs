@@ -3,7 +3,8 @@ use cosmos_client::cosmos_sdk::cosmos::bank::v1beta1::MsgSend;
 use cosmos_client::cosmos_sdk::cosmos::base::v1beta1::Coin;
 use cosmos_client::error::CosmosClientError;
 use cosmos_client::signer::{CosmosTx, Signer};
-use cosmos_sdk_proto::traits::MessageExt;
+use cosmos_client::cosmos_sdk::traits::MessageExt;
+
 use std::io::stdin;
 
 #[tokio::main]
