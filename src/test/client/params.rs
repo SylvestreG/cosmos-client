@@ -5,7 +5,7 @@ mod params_tests {
 
     #[tokio::test]
     async fn evidence() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
+        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let params = client.params.params("distribution", "0").await?;
 

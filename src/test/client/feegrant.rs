@@ -8,7 +8,7 @@ mod feegrant_tests {
 
     #[tokio::test]
     async fn allowance() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
+        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let allowance = client
             .feegrant

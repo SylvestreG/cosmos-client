@@ -1,4 +1,5 @@
 use crate::error::CosmosClientError;
+use crate::error::CosmosClientError::ProstDecodeError;
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::staking::v1beta1::{
     QueryDelegationRequest, QueryDelegationResponse, QueryDelegatorDelegationsRequest,
@@ -40,11 +41,9 @@ impl StakingModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryValidatorResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryValidatorResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn validators(
@@ -64,11 +63,9 @@ impl StakingModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryValidatorsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryValidatorsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn validator_delegations(
@@ -88,11 +85,9 @@ impl StakingModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryValidatorDelegationsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryValidatorDelegationsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn validator_unbonding_delegations(
@@ -112,11 +107,10 @@ impl StakingModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryValidatorUnbondingDelegationsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryValidatorUnbondingDelegationsResponse::decode(query.value.as_slice())
+            .map_err(ProstDecodeError)
     }
 
     pub async fn delegation(
@@ -136,11 +130,9 @@ impl StakingModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryDelegationResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryDelegationResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn unbonding_delegation(
@@ -160,11 +152,9 @@ impl StakingModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryUnbondingDelegationResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryUnbondingDelegationResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn delegator_delegations(
@@ -184,11 +174,9 @@ impl StakingModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryDelegatorDelegationsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryDelegatorDelegationsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn delegator_unbonding_delegations(
@@ -208,11 +196,10 @@ impl StakingModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryDelegatorUnbondingDelegationsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryDelegatorUnbondingDelegationsResponse::decode(query.value.as_slice())
+            .map_err(ProstDecodeError)
     }
 
     pub async fn redelegations(
@@ -236,11 +223,9 @@ impl StakingModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryRedelegationsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryRedelegationsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn delegator_validators(
@@ -260,11 +245,9 @@ impl StakingModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryDelegatorDelegationsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryDelegatorDelegationsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn delegator_validator(
@@ -284,11 +267,9 @@ impl StakingModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryDelegatorValidatorResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryDelegatorValidatorResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn historical_info(
@@ -304,11 +285,9 @@ impl StakingModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryHistoricalInfoResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryHistoricalInfoResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn pool(&self) -> Result<QueryPoolResponse, CosmosClientError> {
@@ -321,11 +300,9 @@ impl StakingModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryPoolResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryPoolResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn params(&self) -> Result<QueryParamsResponse, CosmosClientError> {
@@ -338,10 +315,8 @@ impl StakingModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryParamsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryParamsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

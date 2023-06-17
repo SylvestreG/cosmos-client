@@ -7,7 +7,7 @@ mod mint_tests {
 
     #[tokio::test]
     async fn params() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
+        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let params = client.mint.params().await?;
         assert_eq!(
@@ -26,7 +26,7 @@ mod mint_tests {
 
     #[tokio::test]
     async fn inflation() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
+        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let inflation = client.mint.inflation().await?;
         assert!(
@@ -40,7 +40,7 @@ mod mint_tests {
 
     #[tokio::test]
     async fn annual_provisions() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
+        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let annual_provisions = client.mint.annual_provisions().await?;
         let prov = str::from_utf8(annual_provisions.annual_provisions.as_slice())?

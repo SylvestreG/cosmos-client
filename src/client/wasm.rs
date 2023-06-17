@@ -1,4 +1,5 @@
 use crate::error::CosmosClientError;
+use crate::error::CosmosClientError::ProstDecodeError;
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmwasm::wasm::v1::{
     QueryAllContractStateRequest, QueryAllContractStateResponse, QueryCodeRequest,
@@ -38,11 +39,9 @@ impl WasmModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryContractInfoResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryContractInfoResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn contract_history(
@@ -62,11 +61,9 @@ impl WasmModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryContractHistoryResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryContractHistoryResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn contracts_by_code(
@@ -86,11 +83,9 @@ impl WasmModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryContractsByCodeResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryContractsByCodeResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn all_contract_state(
@@ -110,11 +105,9 @@ impl WasmModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryAllContractStateResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryAllContractStateResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn raw_contract_state(
@@ -134,11 +127,9 @@ impl WasmModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryRawContractStateResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryRawContractStateResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn smart_contract_state<T: Serialize + Clone, U: DeserializeOwned>(
@@ -158,13 +149,12 @@ impl WasmModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
         let resp: QueryRawContractStateResponse =
             QueryRawContractStateResponse::decode(ret.value.as_slice())?;
-        println!("{:#?}", ret);
-        Ok(serde_json::from_slice::<U>(resp.data.as_slice())?)
+
+        serde_json::from_slice::<U>(resp.data.as_slice()).map_err(CosmosClientError::JsonError)
     }
 
     pub async fn code(&self, code_id: u64) -> Result<QueryCodeResponse, CosmosClientError> {
@@ -177,11 +167,9 @@ impl WasmModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryCodeResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryCodeResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn codes(
@@ -197,11 +185,9 @@ impl WasmModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryCodesResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryCodesResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn pinned_codes(
@@ -217,10 +203,8 @@ impl WasmModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryPinnedCodesResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryPinnedCodesResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

@@ -1,4 +1,5 @@
 use crate::error::CosmosClientError;
+use crate::error::CosmosClientError::ProstDecodeError;
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::evidence::v1beta1::{
     QueryAllEvidenceRequest, QueryAllEvidenceResponse, QueryEvidenceRequest, QueryEvidenceResponse,
@@ -29,11 +30,9 @@ impl EvidenceModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryEvidenceResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryEvidenceResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn all_evidence(
@@ -49,10 +48,8 @@ impl EvidenceModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryAllEvidenceResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryAllEvidenceResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

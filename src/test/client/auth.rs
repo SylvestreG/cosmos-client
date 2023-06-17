@@ -6,7 +6,7 @@ mod auth_tests {
 
     #[tokio::test]
     async fn accounts() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-challenge.blockchain.ki")?;
+        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
         let accounts = client.auth.accounts(None).await?;
 
         assert!(accounts.pagination.is_some());
@@ -16,7 +16,7 @@ mod auth_tests {
 
     #[tokio::test]
     async fn account() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-challenge.blockchain.ki")?;
+        let client = RpcClient::new("https://rpc-challenge.blockchain.ki/").await?;
         let account = client
             .auth
             .account("tki1khdhz2ek2h2g8xqggl0p6gyyhkalwu8u0n7zj3")
@@ -42,7 +42,7 @@ mod auth_tests {
 
     #[tokio::test]
     async fn params() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
+        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
         let params = client.auth.params().await?;
 
         assert!(params.params.is_some());

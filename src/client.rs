@@ -14,7 +14,14 @@ pub mod tx;
 pub mod upgrade;
 pub mod wasm;
 
+use crate::client::any_helper::{any_to_cosmos, CosmosType};
+use cosmos_sdk_proto::cosmos::tx::v1beta1::BroadcastMode;
+use cosmrs::tendermint::chain;
+use cosmrs::tx::{Fee, SignDoc, SignerInfo};
+use cosmrs::Coin;
+use std::ops::{DivAssign, MulAssign};
 use std::rc::Rc;
+use std::str::FromStr;
 use tendermint_rpc::{Client, HttpClient};
 
 use crate::client::auth::AuthModule;
@@ -28,14 +35,19 @@ use crate::client::mint::MintModule;
 use crate::client::params::ParamsModule;
 use crate::client::slashing::SlashingModule;
 use crate::client::staking::StakingModule;
-use crate::client::tx::TxModule;
+use crate::client::tx::{TxModule, TxResponse};
 use crate::client::upgrade::UpgradeModule;
 use crate::client::wasm::WasmModule;
 use crate::error::CosmosClientError;
+use crate::error::CosmosClientError::{AccountDoesNotExistOnChain, NoSignerAttached};
+use crate::signer::Signer;
+use crate::tx::CosmosTx;
 
 pub struct RpcClient {
-    rpc: Rc<HttpClient>,
-    chain_id: Option<String>,
+    chain_id: String,
+    signer: Option<Signer>,
+    account_id: Option<u64>,
+    sequence_id: Option<u64>,
     pub bank: BankModule,
     pub auth: AuthModule,
     pub authz: AuthzModule,
@@ -53,12 +65,14 @@ pub struct RpcClient {
 }
 
 impl RpcClient {
-    pub fn new(url: &str) -> Result<Self, CosmosClientError> {
+    pub async fn new(url: &str) -> Result<Self, CosmosClientError> {
         let rpc = Rc::new(HttpClient::new(url)?);
 
         Ok(RpcClient {
-            rpc: rpc.clone(),
-            chain_id: None,
+            chain_id: rpc.status().await?.node_info.network.to_string(),
+            signer: None,
+            account_id: None,
+            sequence_id: None,
             auth: AuthModule::new(rpc.clone()),
             authz: AuthzModule::new(rpc.clone()),
             bank: BankModule::new(rpc.clone()),
@@ -76,11 +90,110 @@ impl RpcClient {
         })
     }
 
-    pub async fn chain_id(&mut self) -> Result<String, CosmosClientError> {
-        if self.chain_id.is_none() {
-            self.chain_id = Some(self.rpc.status().await?.node_info.network.to_string())
+    pub async fn attach_signer(&mut self, signer: Signer) -> Result<(), CosmosClientError> {
+        self.signer = Some(signer);
+        self.update_sequence_id().await?;
+        Ok(())
+    }
+
+    pub async fn update_sequence_id(&mut self) -> Result<(), CosmosClientError> {
+        let signer = self.signer()?;
+
+        let account = self
+            .auth
+            .account(signer.public_address.to_string().as_str())
+            .await?;
+        if let Some(account) = account.account {
+            if let Ok(CosmosType::BaseAccount(account)) = any_to_cosmos(&account) {
+                self.sequence_id = Some(account.sequence);
+                self.account_id = Some(account.account_number);
+                return Ok(());
+            }
         }
 
-        Ok(self.chain_id.clone().unwrap())
+        Err(AccountDoesNotExistOnChain {
+            address: signer.public_address.to_string(),
+        })
+    }
+
+    pub async fn sign(&mut self, tx: CosmosTx) -> Result<Vec<u8>, CosmosClientError> {
+        let account_id = self.account_id.ok_or(AccountDoesNotExistOnChain {
+            address: self.signer()?.public_address.to_string(),
+        })?;
+        let sequence_id = self.sequence_id.ok_or(AccountDoesNotExistOnChain {
+            address: self.signer()?.public_address.to_string(),
+        })?;
+        self.sequence_id = Some(self.sequence_id.unwrap_or_default() + 1u64);
+
+        let signer = self.signer()?;
+
+        let tx_body = tx.finish();
+        let auth_info = SignerInfo::single_direct(Some(signer.public_key), sequence_id).auth_info(
+            Fee::from_amount_and_gas(
+                Coin {
+                    amount: signer.gas_price,
+                    denom: signer.denom.parse()?,
+                },
+                100u64,
+            ),
+        );
+
+        let sign_doc = SignDoc::new(
+            &tx_body,
+            &auth_info,
+            &chain::Id::from_str(self.chain_id.as_str())?,
+            account_id,
+        )?;
+        let tx_raw = sign_doc.sign(&signer.private_key)?;
+        let tx = self.tx.simulate(tx_raw.to_bytes()?).await?;
+
+        if tx.gas_info.is_none() {
+            return Err(CosmosClientError::CannotSimulateTxGasFee);
+        }
+
+        let mut gas_info = tx.gas_info.unwrap_or_default().gas_used;
+        gas_info.mul_assign(100u64 + u64::from(signer.gas_adjustment_percent));
+        gas_info.div_assign(100);
+
+        let auth_info = SignerInfo::single_direct(Some(signer.public_key), sequence_id).auth_info(
+            Fee::from_amount_and_gas(
+                Coin {
+                    amount: signer.gas_price,
+                    denom: signer.denom.parse()?,
+                },
+                gas_info,
+            ),
+        );
+
+        let sign_doc = SignDoc::new(
+            &tx_body,
+            &auth_info,
+            &chain::Id::from_str(self.chain_id.as_str())?,
+            account_id,
+        )?;
+
+        Ok(sign_doc.sign(&signer.private_key)?.to_bytes()?)
+    }
+
+    pub async fn broadcast(
+        &mut self,
+        payload: Vec<u8>,
+        mode: BroadcastMode,
+    ) -> Result<TxResponse, CosmosClientError> {
+        self.tx.broadcast(payload, mode).await
+    }
+
+    pub async fn sign_and_broadcast(
+        &mut self,
+        tx: CosmosTx,
+        mode: BroadcastMode,
+    ) -> Result<TxResponse, CosmosClientError> {
+        let payload = self.sign(tx).await?;
+
+        self.tx.broadcast(payload, mode).await
+    }
+
+    fn signer(&self) -> Result<&Signer, CosmosClientError> {
+        self.signer.as_ref().ok_or(NoSignerAttached)
     }
 }

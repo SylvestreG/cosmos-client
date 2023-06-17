@@ -1,4 +1,5 @@
 use crate::error::CosmosClientError;
+use crate::error::CosmosClientError::ProstDecodeError;
 use cosmos_sdk_proto::cosmos::mint::v1beta1::{
     QueryAnnualProvisionsRequest, QueryAnnualProvisionsResponse, QueryInflationRequest,
     QueryInflationResponse, QueryParamsRequest, QueryParamsResponse,
@@ -28,11 +29,9 @@ impl MintModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryAnnualProvisionsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryAnnualProvisionsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn inflation(&self) -> Result<QueryInflationResponse, CosmosClientError> {
@@ -45,11 +44,9 @@ impl MintModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryInflationResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryInflationResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn params(&self) -> Result<QueryParamsResponse, CosmosClientError> {
@@ -62,10 +59,8 @@ impl MintModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryParamsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryParamsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

@@ -1,6 +1,7 @@
 use cosmrs::ErrorReport;
 use hex::FromHexError;
-use prost::DecodeError;
+use prost::{DecodeError, EncodeError};
+use std::convert::Infallible;
 use std::io;
 use std::str::Utf8Error;
 use thiserror::Error;
@@ -11,6 +12,8 @@ pub enum CosmosClientError {
     TendermintRpcError(#[from] tendermint_rpc::Error),
     #[error("Decode Error")]
     ProstDecodeError(#[from] DecodeError),
+    #[error("Decode Error")]
+    ProstEncodeError(#[from] EncodeError),
     #[error("Json Error")]
     JsonError(#[from] serde_json::Error),
     #[error("CosmosRs tendermint Error")]
@@ -27,9 +30,15 @@ pub enum CosmosClientError {
     ErrorReport(#[from] ErrorReport),
     #[error("FromHexError")]
     FromHexError(#[from] FromHexError),
+    #[error("Infaillible")]
+    Infaillible(#[from] Infallible),
 
     #[error("Unknown cosmos-sdk Msg")]
-    UnknownCosmosMsg(),
+    UnknownCosmosMsg,
     #[error("Account does not exist {address:?}")]
     AccountDoesNotExistOnChain { address: String },
+    #[error("Cannot simulate TX Gas Fee")]
+    CannotSimulateTxGasFee,
+    #[error("No signer attached")]
+    NoSignerAttached,
 }

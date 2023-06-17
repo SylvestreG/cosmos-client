@@ -1,4 +1,5 @@
 use crate::error::CosmosClientError;
+use crate::error::CosmosClientError::ProstDecodeError;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::{
     QueryAccountRequest, QueryAccountResponse, QueryAccountsRequest, QueryAccountsResponse,
     QueryParamsRequest, QueryParamsResponse,
@@ -30,11 +31,9 @@ impl AuthModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryAccountsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryAccountsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn account(&self, address: &str) -> Result<QueryAccountResponse, CosmosClientError> {
@@ -49,11 +48,9 @@ impl AuthModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryAccountResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryAccountResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn params(&self) -> Result<QueryParamsResponse, CosmosClientError> {
@@ -66,10 +63,8 @@ impl AuthModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryParamsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryParamsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

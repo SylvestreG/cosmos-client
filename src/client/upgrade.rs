@@ -1,4 +1,5 @@
 use crate::error::CosmosClientError;
+use crate::error::CosmosClientError::ProstDecodeError;
 use cosmos_sdk_proto::cosmos::upgrade::v1beta1::{
     QueryAppliedPlanResponse, QueryCurrentPlanRequest, QueryCurrentPlanResponse,
     QueryModuleVersionsRequest, QueryModuleVersionsResponse, QueryUpgradedConsensusStateRequest,
@@ -27,11 +28,9 @@ impl UpgradeModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryCurrentPlanResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryCurrentPlanResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn applied_plan(
@@ -47,11 +46,9 @@ impl UpgradeModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryAppliedPlanResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryAppliedPlanResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn upgrade_consensus_state(
@@ -67,11 +64,10 @@ impl UpgradeModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryUpgradedConsensusStateResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryUpgradedConsensusStateResponse::decode(query.value.as_slice())
+            .map_err(ProstDecodeError)
     }
 
     pub async fn module_versions(
@@ -89,10 +85,8 @@ impl UpgradeModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryModuleVersionsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryModuleVersionsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

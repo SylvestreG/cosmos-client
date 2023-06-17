@@ -30,6 +30,6 @@ pub fn any_to_cosmos(cosmos: &Any) -> Result<CosmosType, CosmosClientError> {
         "/cosmos.feegrant.v1beta1.BasicAllowance" => Ok(CosmosType::BasicAllowance(
             BasicAllowance::decode(cosmos.value.as_slice())?,
         )),
-        _ => Err(CosmosClientError::UnknownCosmosMsg()),
+        _ => Err(CosmosClientError::UnknownCosmosMsg),
     }
 }

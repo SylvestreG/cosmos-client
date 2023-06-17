@@ -1,4 +1,5 @@
 use crate::error::CosmosClientError;
+use crate::error::CosmosClientError::ProstDecodeError;
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::gov::v1beta1::{
     QueryDepositRequest, QueryDepositResponse, QueryDepositsRequest, QueryDepositsResponse,
@@ -33,11 +34,9 @@ impl GovModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryProposalResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryProposalResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn proposals(
@@ -61,11 +60,9 @@ impl GovModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryProposalsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryProposalsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn vote(
@@ -85,11 +82,9 @@ impl GovModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryVoteResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryVoteResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn votes(
@@ -109,11 +104,9 @@ impl GovModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryVotesResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryVotesResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn params(
@@ -131,11 +124,9 @@ impl GovModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryParamsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryParamsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn deposit(
@@ -155,11 +146,9 @@ impl GovModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryDepositResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryDepositResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn deposits(
@@ -179,11 +168,9 @@ impl GovModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryDepositsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryDepositsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn tally_result(
@@ -199,10 +186,8 @@ impl GovModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryTallyResultResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryTallyResultResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

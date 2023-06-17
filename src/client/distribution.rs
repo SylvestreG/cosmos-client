@@ -1,4 +1,5 @@
 use crate::error::CosmosClientError;
+use crate::error::CosmosClientError::ProstDecodeError;
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::distribution::v1beta1::{
     QueryCommunityPoolRequest, QueryCommunityPoolResponse, QueryDelegationTotalRewardsRequest,
@@ -33,11 +34,9 @@ impl DistributionModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryParamsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryParamsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn validator_outstanding_rewards(
@@ -55,11 +54,10 @@ impl DistributionModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryValidatorOutstandingRewardsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryValidatorOutstandingRewardsResponse::decode(query.value.as_slice())
+            .map_err(ProstDecodeError)
     }
 
     pub async fn validator_commission(
@@ -77,11 +75,9 @@ impl DistributionModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryValidatorCommissionResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryValidatorCommissionResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn validator_slashes(
@@ -105,11 +101,9 @@ impl DistributionModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryValidatorSlashesResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryValidatorSlashesResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn delegation_rewards(
@@ -129,11 +123,9 @@ impl DistributionModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryDelegationResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryDelegationResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn delegation_total_rewards(
@@ -151,11 +143,10 @@ impl DistributionModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryDelegationTotalRewardsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryDelegationTotalRewardsResponse::decode(query.value.as_slice())
+            .map_err(ProstDecodeError)
     }
 
     pub async fn delegator_validators(
@@ -173,11 +164,9 @@ impl DistributionModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryDelegatorValidatorsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryDelegatorValidatorsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn delegator_withdraw_address(
@@ -195,11 +184,10 @@ impl DistributionModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryDelegatorWithdrawAddressResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryDelegatorWithdrawAddressResponse::decode(query.value.as_slice())
+            .map_err(ProstDecodeError)
     }
 
     pub async fn community_pool(&self) -> Result<QueryCommunityPoolResponse, CosmosClientError> {
@@ -212,10 +200,8 @@ impl DistributionModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryCommunityPoolResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryCommunityPoolResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

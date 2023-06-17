@@ -1,4 +1,5 @@
 use crate::error::CosmosClientError;
+use crate::error::CosmosClientError::ProstDecodeError;
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::slashing::v1beta1::{
     QueryParamsRequest, QueryParamsResponse, QuerySigningInfoRequest, QuerySigningInfoResponse,
@@ -27,11 +28,9 @@ impl SlashingModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryParamsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryParamsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn signing_info(
@@ -49,11 +48,9 @@ impl SlashingModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QuerySigningInfoResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QuerySigningInfoResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn signing_infos(
@@ -69,10 +66,8 @@ impl SlashingModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QuerySigningInfosResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QuerySigningInfosResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

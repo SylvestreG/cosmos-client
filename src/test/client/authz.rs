@@ -6,7 +6,7 @@ mod authz_tests {
 
     #[tokio::test]
     async fn grantee() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
+        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let grants = client
             .authz
@@ -30,7 +30,7 @@ mod authz_tests {
 
     #[tokio::test]
     async fn granter() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/")?;
+        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let grants = client
             .authz

@@ -1,4 +1,5 @@
 use crate::error::CosmosClientError;
+use crate::error::CosmosClientError::ProstDecodeError;
 use cosmos_sdk_proto::cosmos::authz::v1beta1::{
     QueryGranteeGrantsRequest, QueryGranteeGrantsResponse, QueryGranterGrantsRequest,
     QueryGranterGrantsResponse, QueryGrantsRequest, QueryGrantsResponse,
@@ -38,11 +39,9 @@ impl AuthzModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryGrantsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryGrantsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn granter_grants(
@@ -62,11 +61,9 @@ impl AuthzModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryGranterGrantsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryGranterGrantsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn grantee_grants(
@@ -86,10 +83,7 @@ impl AuthzModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
-
-        let resp = QueryGranteeGrantsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+            .await?;
+        QueryGranteeGrantsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

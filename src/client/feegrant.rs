@@ -1,4 +1,5 @@
 use crate::error::CosmosClientError;
+use crate::error::CosmosClientError::ProstDecodeError;
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::feegrant::v1beta1::{
     QueryAllowanceRequest, QueryAllowanceResponse, QueryAllowancesRequest, QueryAllowancesResponse,
@@ -33,11 +34,9 @@ impl FeeGrantModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryAllowanceResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryAllowanceResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn allowances(
@@ -57,10 +56,8 @@ impl FeeGrantModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryAllowancesResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryAllowancesResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

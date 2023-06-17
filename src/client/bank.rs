@@ -1,4 +1,5 @@
 use crate::error::CosmosClientError;
+use crate::error::CosmosClientError::ProstDecodeError;
 use cosmos_sdk_proto::cosmos::bank::v1beta1::{
     MsgSend, QueryAllBalancesRequest, QueryAllBalancesResponse, QueryBalanceRequest,
     QueryBalanceResponse, QueryDenomMetadataRequest, QueryDenomMetadataResponse,
@@ -37,11 +38,9 @@ impl BankModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryBalanceResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryBalanceResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn all_balances(
@@ -61,11 +60,9 @@ impl BankModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryAllBalancesResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryAllBalancesResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn spendable_balances(
@@ -85,11 +82,9 @@ impl BankModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QuerySpendableBalancesResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QuerySpendableBalancesResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn total_supply(
@@ -105,11 +100,9 @@ impl BankModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryTotalSupplyResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryTotalSupplyResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn supply_of(&self, denom: &str) -> Result<QuerySupplyOfResponse, CosmosClientError> {
@@ -124,11 +117,9 @@ impl BankModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QuerySupplyOfResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QuerySupplyOfResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn params(&self) -> Result<QueryParamsResponse, CosmosClientError> {
@@ -141,11 +132,9 @@ impl BankModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryParamsResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryParamsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn denom_metadata(
@@ -163,11 +152,9 @@ impl BankModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryDenomMetadataResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryDenomMetadataResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn denoms_metadata(
@@ -183,11 +170,9 @@ impl BankModule {
                 None,
                 false,
             )
-            .await
-            .unwrap();
+            .await?;
 
-        let resp = QueryDenomsMetadataResponse::decode(query.value.as_slice())?;
-        Ok(resp)
+        QueryDenomsMetadataResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub fn msg_send_payload(from: &str, to: &str) -> Vec<u8> {
