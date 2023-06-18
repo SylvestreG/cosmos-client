@@ -15,7 +15,7 @@ async fn main() -> Result<(), CosmosClientError> {
     }
     let input = input.unwrap_or_default();
 
-    let mut client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    let mut client = RpcClient::new("https://rpc-mainnet.blockchain.ki").await?;
     let signer = Signer::from_mnemonic(input.trim(), "ki", "uxki", None, 10, 2500)?;
     let address = signer.public_address.to_string();
     client.attach_signer(signer).await?;

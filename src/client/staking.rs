@@ -5,13 +5,13 @@ use cosmos_sdk_proto::cosmos::staking::v1beta1::{
     QueryDelegationRequest, QueryDelegationResponse, QueryDelegatorDelegationsRequest,
     QueryDelegatorDelegationsResponse, QueryDelegatorUnbondingDelegationsRequest,
     QueryDelegatorUnbondingDelegationsResponse, QueryDelegatorValidatorRequest,
-    QueryDelegatorValidatorResponse, QueryHistoricalInfoRequest, QueryHistoricalInfoResponse,
-    QueryParamsRequest, QueryParamsResponse, QueryPoolRequest, QueryPoolResponse,
-    QueryRedelegationsRequest, QueryRedelegationsResponse, QueryUnbondingDelegationRequest,
-    QueryUnbondingDelegationResponse, QueryValidatorDelegationsRequest,
-    QueryValidatorDelegationsResponse, QueryValidatorRequest, QueryValidatorResponse,
-    QueryValidatorUnbondingDelegationsRequest, QueryValidatorUnbondingDelegationsResponse,
-    QueryValidatorsRequest, QueryValidatorsResponse,
+    QueryDelegatorValidatorResponse, QueryDelegatorValidatorsResponse, QueryHistoricalInfoRequest,
+    QueryHistoricalInfoResponse, QueryParamsRequest, QueryParamsResponse, QueryPoolRequest,
+    QueryPoolResponse, QueryRedelegationsRequest, QueryRedelegationsResponse,
+    QueryUnbondingDelegationRequest, QueryUnbondingDelegationResponse,
+    QueryValidatorDelegationsRequest, QueryValidatorDelegationsResponse, QueryValidatorRequest,
+    QueryValidatorResponse, QueryValidatorUnbondingDelegationsRequest,
+    QueryValidatorUnbondingDelegationsResponse, QueryValidatorsRequest, QueryValidatorsResponse,
 };
 use prost::Message;
 use std::rc::Rc;
@@ -232,7 +232,7 @@ impl StakingModule {
         &self,
         delegator_addr: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryDelegatorValidatorResponse, CosmosClientError> {
+    ) -> Result<QueryDelegatorValidatorsResponse, CosmosClientError> {
         let query = QueryDelegatorDelegationsRequest {
             delegator_addr: delegator_addr.to_string(),
             pagination,
@@ -247,7 +247,7 @@ impl StakingModule {
             )
             .await?;
 
-        QueryDelegatorValidatorResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
+        QueryDelegatorValidatorsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn delegator_validator(
