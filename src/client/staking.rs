@@ -232,7 +232,7 @@ impl StakingModule {
         &self,
         delegator_addr: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryDelegatorDelegationsResponse, CosmosClientError> {
+    ) -> Result<QueryDelegatorValidatorResponse, CosmosClientError> {
         let query = QueryDelegatorDelegationsRequest {
             delegator_addr: delegator_addr.to_string(),
             pagination,
@@ -247,7 +247,7 @@ impl StakingModule {
             )
             .await?;
 
-        QueryDelegatorDelegationsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
+        QueryDelegatorValidatorResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn delegator_validator(

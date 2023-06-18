@@ -15,10 +15,12 @@ pub mod upgrade;
 pub mod wasm;
 
 use crate::client::any_helper::{any_to_cosmos, CosmosType};
+use cosmos_sdk_proto::cosmos::bank::v1beta1::MsgSend;
+use cosmos_sdk_proto::cosmos::base::v1beta1::Coin;
 use cosmos_sdk_proto::cosmos::tx::v1beta1::BroadcastMode;
+use cosmos_sdk_proto::traits::MessageExt;
 use cosmrs::tendermint::chain;
 use cosmrs::tx::{Fee, SignDoc, SignerInfo};
-use cosmrs::Coin;
 use std::ops::{DivAssign, MulAssign};
 use std::rc::Rc;
 use std::str::FromStr;
@@ -130,7 +132,7 @@ impl RpcClient {
         let tx_body = tx.finish();
         let auth_info = SignerInfo::single_direct(Some(signer.public_key), sequence_id).auth_info(
             Fee::from_amount_and_gas(
-                Coin {
+                cosmrs::Coin {
                     amount: signer.gas_price,
                     denom: signer.denom.parse()?,
                 },
@@ -157,7 +159,7 @@ impl RpcClient {
 
         let auth_info = SignerInfo::single_direct(Some(signer.public_key), sequence_id).auth_info(
             Fee::from_amount_and_gas(
-                Coin {
+                cosmrs::Coin {
                     amount: signer.gas_price,
                     denom: signer.denom.parse()?,
                 },
@@ -195,5 +197,28 @@ impl RpcClient {
 
     fn signer(&self) -> Result<&Signer, CosmosClientError> {
         self.signer.as_ref().ok_or(NoSignerAttached)
+    }
+
+    pub async fn send(
+        &mut self,
+        to: &str,
+        coin: Vec<Coin>,
+        memo: Option<String>,
+    ) -> Result<TxResponse, CosmosClientError> {
+        let signer = self.signer()?;
+
+        let mut payload = CosmosTx::build().memo("send token").add_msg(
+            MsgSend {
+                from_address: signer.public_address.to_string(),
+                to_address: to.to_string(),
+                amount: coin,
+            }
+            .to_any()?,
+        );
+        if let Some(memo) = memo {
+            payload = payload.memo(memo.as_str());
+        }
+
+        self.sign_and_broadcast(payload, BroadcastMode::Block).await
     }
 }
