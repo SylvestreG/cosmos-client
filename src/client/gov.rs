@@ -1,5 +1,5 @@
 use crate::error::CosmosClientError;
-use crate::error::CosmosClientError::ProstDecodeError;
+use crate::error::CosmosClientError::{ProstDecodeError, RpcError};
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::gov::v1beta1::{
     QueryDepositRequest, QueryDepositResponse, QueryDepositsRequest, QueryDepositsResponse,
@@ -8,6 +8,7 @@ use cosmos_sdk_proto::cosmos::gov::v1beta1::{
     QueryTallyResultResponse, QueryVoteRequest, QueryVoteResponse, QueryVotesRequest,
     QueryVotesResponse,
 };
+use cosmrs::tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};
@@ -36,6 +37,9 @@ impl GovModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryProposalResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -62,6 +66,9 @@ impl GovModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryProposalsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -84,6 +91,9 @@ impl GovModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryVoteResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -106,6 +116,9 @@ impl GovModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryVotesResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -126,6 +139,9 @@ impl GovModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryParamsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -148,6 +164,9 @@ impl GovModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryDepositResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -170,6 +189,9 @@ impl GovModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryDepositsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -188,6 +210,9 @@ impl GovModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryTallyResultResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

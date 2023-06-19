@@ -1,6 +1,9 @@
 use crate::error::CosmosClientError;
-use crate::error::CosmosClientError::ProstDecodeError;
-use cosmos_sdk_proto::cosmos::tx::v1beta1::{BroadcastMode, SimulateRequest, SimulateResponse};
+use crate::error::CosmosClientError::{ProstDecodeError, RpcError};
+use cosmos_sdk_proto::cosmos::tx::v1beta1::{
+    BroadcastMode, GetTxRequest, GetTxResponse, SimulateRequest, SimulateResponse,
+};
+use cosmrs::tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::endpoint::broadcast::{tx_async, tx_commit, tx_sync};
@@ -39,6 +42,9 @@ impl TxModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         SimulateResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -56,5 +62,26 @@ impl TxModule {
                 TxResponse::Commit(self.rpc.broadcast_tx_commit(payload).await?)
             }
         })
+    }
+
+    pub async fn get_tx(&self, hash: &str) -> Result<GetTxResponse, CosmosClientError> {
+        let query = GetTxRequest {
+            hash: hash.to_string(),
+        };
+
+        let query = self
+            .rpc
+            .abci_query(
+                Some("/cosmos.tx.v1beta1.Service/GetTx".to_string()),
+                query.encode_to_vec(),
+                None,
+                false,
+            )
+            .await?;
+
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
+        GetTxResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

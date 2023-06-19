@@ -1,10 +1,11 @@
 use crate::error::CosmosClientError;
-use crate::error::CosmosClientError::ProstDecodeError;
+use crate::error::CosmosClientError::{ProstDecodeError, RpcError};
 use cosmos_sdk_proto::cosmos::upgrade::v1beta1::{
     QueryAppliedPlanResponse, QueryCurrentPlanRequest, QueryCurrentPlanResponse,
     QueryModuleVersionsRequest, QueryModuleVersionsResponse, QueryUpgradedConsensusStateRequest,
     QueryUpgradedConsensusStateResponse,
 };
+use cosmrs::tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};
@@ -30,6 +31,9 @@ impl UpgradeModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryCurrentPlanResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -48,6 +52,9 @@ impl UpgradeModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryAppliedPlanResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -66,6 +73,9 @@ impl UpgradeModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryUpgradedConsensusStateResponse::decode(query.value.as_slice())
             .map_err(ProstDecodeError)
     }
@@ -87,6 +97,9 @@ impl UpgradeModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryModuleVersionsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

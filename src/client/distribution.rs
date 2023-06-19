@@ -1,8 +1,9 @@
 use crate::error::CosmosClientError;
-use crate::error::CosmosClientError::ProstDecodeError;
+use crate::error::CosmosClientError::{ProstDecodeError, RpcError};
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::distribution::v1beta1::{
-    QueryCommunityPoolRequest, QueryCommunityPoolResponse, QueryDelegationTotalRewardsRequest,
+    QueryCommunityPoolRequest, QueryCommunityPoolResponse, QueryDelegationRewardsRequest,
+    QueryDelegationRewardsResponse, QueryDelegationTotalRewardsRequest,
     QueryDelegationTotalRewardsResponse, QueryDelegatorValidatorsRequest,
     QueryDelegatorValidatorsResponse, QueryDelegatorWithdrawAddressRequest,
     QueryDelegatorWithdrawAddressResponse, QueryParamsRequest, QueryParamsResponse,
@@ -10,7 +11,7 @@ use cosmos_sdk_proto::cosmos::distribution::v1beta1::{
     QueryValidatorOutstandingRewardsRequest, QueryValidatorOutstandingRewardsResponse,
     QueryValidatorSlashesRequest, QueryValidatorSlashesResponse,
 };
-use cosmos_sdk_proto::cosmos::staking::v1beta1::{QueryDelegationRequest, QueryDelegationResponse};
+use cosmrs::tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};
@@ -36,6 +37,9 @@ impl DistributionModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryParamsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -56,6 +60,9 @@ impl DistributionModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryValidatorOutstandingRewardsResponse::decode(query.value.as_slice())
             .map_err(ProstDecodeError)
     }
@@ -77,6 +84,9 @@ impl DistributionModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryValidatorCommissionResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -103,17 +113,20 @@ impl DistributionModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryValidatorSlashesResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn delegation_rewards(
         &self,
-        delegator_addr: &str,
-        validator_addr: &str,
-    ) -> Result<QueryDelegationResponse, CosmosClientError> {
-        let query = QueryDelegationRequest {
-            delegator_addr: delegator_addr.to_string(),
-            validator_addr: validator_addr.to_string(),
+        delegator_address: &str,
+        validator_address: &str,
+    ) -> Result<QueryDelegationRewardsResponse, CosmosClientError> {
+        let query = QueryDelegationRewardsRequest {
+            delegator_address: delegator_address.to_string(),
+            validator_address: validator_address.to_string(),
         };
         let query = self
             .rpc
@@ -125,7 +138,10 @@ impl DistributionModule {
             )
             .await?;
 
-        QueryDelegationResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
+        QueryDelegationRewardsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
     pub async fn delegation_total_rewards(
@@ -145,6 +161,9 @@ impl DistributionModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryDelegationTotalRewardsResponse::decode(query.value.as_slice())
             .map_err(ProstDecodeError)
     }
@@ -166,6 +185,9 @@ impl DistributionModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryDelegatorValidatorsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -186,6 +208,9 @@ impl DistributionModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryDelegatorWithdrawAddressResponse::decode(query.value.as_slice())
             .map_err(ProstDecodeError)
     }
@@ -202,6 +227,9 @@ impl DistributionModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryCommunityPoolResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

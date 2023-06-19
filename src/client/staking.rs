@@ -1,5 +1,5 @@
 use crate::error::CosmosClientError;
-use crate::error::CosmosClientError::ProstDecodeError;
+use crate::error::CosmosClientError::{ProstDecodeError, RpcError};
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::staking::v1beta1::{
     QueryDelegationRequest, QueryDelegationResponse, QueryDelegatorDelegationsRequest,
@@ -13,6 +13,7 @@ use cosmos_sdk_proto::cosmos::staking::v1beta1::{
     QueryValidatorResponse, QueryValidatorUnbondingDelegationsRequest,
     QueryValidatorUnbondingDelegationsResponse, QueryValidatorsRequest, QueryValidatorsResponse,
 };
+use cosmrs::tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};
@@ -43,6 +44,9 @@ impl StakingModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryValidatorResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -65,6 +69,9 @@ impl StakingModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryValidatorsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -87,6 +94,9 @@ impl StakingModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryValidatorDelegationsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -109,6 +119,9 @@ impl StakingModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryValidatorUnbondingDelegationsResponse::decode(query.value.as_slice())
             .map_err(ProstDecodeError)
     }
@@ -132,6 +145,9 @@ impl StakingModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryDelegationResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -154,6 +170,9 @@ impl StakingModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryUnbondingDelegationResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -176,6 +195,9 @@ impl StakingModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryDelegatorDelegationsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -198,6 +220,9 @@ impl StakingModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryDelegatorUnbondingDelegationsResponse::decode(query.value.as_slice())
             .map_err(ProstDecodeError)
     }
@@ -225,6 +250,9 @@ impl StakingModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryRedelegationsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -247,6 +275,9 @@ impl StakingModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryDelegatorValidatorsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -269,6 +300,9 @@ impl StakingModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryDelegatorValidatorResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -287,6 +321,9 @@ impl StakingModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryHistoricalInfoResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -302,6 +339,9 @@ impl StakingModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryPoolResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -317,6 +357,9 @@ impl StakingModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryParamsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

@@ -1,10 +1,11 @@
 use crate::error::CosmosClientError;
-use crate::error::CosmosClientError::ProstDecodeError;
+use crate::error::CosmosClientError::{ProstDecodeError, RpcError};
 use cosmos_sdk_proto::cosmos::auth::v1beta1::{
     QueryAccountRequest, QueryAccountResponse, QueryAccountsRequest, QueryAccountsResponse,
     QueryParamsRequest, QueryParamsResponse,
 };
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
+use cosmrs::tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};
@@ -33,6 +34,9 @@ impl AuthModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryAccountsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -50,6 +54,9 @@ impl AuthModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryAccountResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -65,6 +72,9 @@ impl AuthModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryParamsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

@@ -3,6 +3,7 @@ use hex::FromHexError;
 use prost::{DecodeError, EncodeError};
 use std::convert::Infallible;
 use std::io;
+use std::num::ParseIntError;
 use std::str::Utf8Error;
 use thiserror::Error;
 
@@ -32,6 +33,8 @@ pub enum CosmosClientError {
     FromHexError(#[from] FromHexError),
     #[error("Infaillible")]
     Infaillible(#[from] Infallible),
+    #[error("Parse Int Error")]
+    ParseIntError(#[from] ParseIntError),
 
     #[error("Unknown cosmos-sdk Msg")]
     UnknownCosmosMsg,
@@ -41,4 +44,8 @@ pub enum CosmosClientError {
     CannotSimulateTxGasFee,
     #[error("No signer attached")]
     NoSignerAttached,
+    #[error("Rpc errors : {0}")]
+    RpcError(String),
+    #[error("Tx Polling Timeout")]
+    TXPollingTimeout,
 }

@@ -1,5 +1,5 @@
 use crate::error::CosmosClientError;
-use crate::error::CosmosClientError::ProstDecodeError;
+use crate::error::CosmosClientError::{ProstDecodeError, RpcError};
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmwasm::wasm::v1::{
     QueryAllContractStateRequest, QueryAllContractStateResponse, QueryCodeRequest,
@@ -9,6 +9,7 @@ use cosmos_sdk_proto::cosmwasm::wasm::v1::{
     QueryPinnedCodesResponse, QueryRawContractStateRequest, QueryRawContractStateResponse,
     QuerySmartContractStateRequest,
 };
+use cosmrs::tendermint::abci::Code;
 use prost::Message;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
@@ -41,6 +42,9 @@ impl WasmModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryContractInfoResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -63,6 +67,9 @@ impl WasmModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryContractHistoryResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -85,6 +92,9 @@ impl WasmModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryContractsByCodeResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -107,6 +117,9 @@ impl WasmModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryAllContractStateResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -129,6 +142,9 @@ impl WasmModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryRawContractStateResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -151,6 +167,9 @@ impl WasmModule {
             )
             .await?;
 
+        if ret.code != Code::Ok {
+            return Err(RpcError(ret.log));
+        }
         let resp: QueryRawContractStateResponse =
             QueryRawContractStateResponse::decode(ret.value.as_slice())?;
 
@@ -169,6 +188,9 @@ impl WasmModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryCodeResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -187,6 +209,9 @@ impl WasmModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryCodesResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -205,6 +230,9 @@ impl WasmModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryPinnedCodesResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

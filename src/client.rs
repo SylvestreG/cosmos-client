@@ -17,13 +17,17 @@ pub mod wasm;
 use crate::client::any_helper::{any_to_cosmos, CosmosType};
 use cosmos_sdk_proto::cosmos::bank::v1beta1::MsgSend;
 use cosmos_sdk_proto::cosmos::base::v1beta1::Coin;
-use cosmos_sdk_proto::cosmos::tx::v1beta1::BroadcastMode;
+use cosmos_sdk_proto::cosmos::distribution::v1beta1::MsgWithdrawDelegatorReward;
+use cosmos_sdk_proto::cosmos::staking::v1beta1::{MsgDelegate, MsgUndelegate};
+use cosmos_sdk_proto::cosmos::tx::v1beta1::{BroadcastMode, GetTxResponse};
 use cosmos_sdk_proto::traits::MessageExt;
 use cosmrs::tendermint::chain;
 use cosmrs::tx::{Fee, SignDoc, SignerInfo};
 use std::ops::{DivAssign, MulAssign};
 use std::rc::Rc;
 use std::str::FromStr;
+use std::thread::sleep;
+use std::time::Duration;
 use tendermint_rpc::{Client, HttpClient};
 
 use crate::client::auth::AuthModule;
@@ -199,15 +203,34 @@ impl RpcClient {
         self.signer.as_ref().ok_or(NoSignerAttached)
     }
 
+    async fn poll_for_tx(&self, tx: TxResponse) -> Result<GetTxResponse, CosmosClientError> {
+        let hash = match tx {
+            TxResponse::Sync(tx) => tx.hash,
+            TxResponse::Async(tx) => tx.hash,
+            TxResponse::Commit(tx) => tx.hash,
+        };
+
+        for _ in 0..60 {
+            let tx = self.tx.get_tx(hash.to_string().as_str()).await;
+
+            if tx.is_ok() {
+                return tx;
+            }
+            sleep(Duration::from_secs(3));
+        }
+
+        Err(CosmosClientError::TXPollingTimeout)
+    }
+
     pub async fn send(
         &mut self,
         to: &str,
         coin: Vec<Coin>,
-        memo: Option<String>,
-    ) -> Result<TxResponse, CosmosClientError> {
+        memo: Option<&str>,
+    ) -> Result<GetTxResponse, CosmosClientError> {
         let signer = self.signer()?;
 
-        let mut payload = CosmosTx::build().memo("send token").add_msg(
+        let mut payload = CosmosTx::build().add_msg(
             MsgSend {
                 from_address: signer.public_address.to_string(),
                 to_address: to.to_string(),
@@ -216,9 +239,88 @@ impl RpcClient {
             .to_any()?,
         );
         if let Some(memo) = memo {
-            payload = payload.memo(memo.as_str());
+            payload = payload.memo(memo);
         }
 
-        self.sign_and_broadcast(payload, BroadcastMode::Block).await
+        let tx = self
+            .sign_and_broadcast(payload, BroadcastMode::Sync)
+            .await?;
+        self.poll_for_tx(tx).await
+    }
+
+    pub async fn stake(
+        &mut self,
+        to: &str,
+        coin: Coin,
+        memo: Option<&str>,
+    ) -> Result<GetTxResponse, CosmosClientError> {
+        let signer = self.signer()?;
+
+        let mut payload = CosmosTx::build().add_msg(
+            MsgDelegate {
+                delegator_address: signer.public_address.to_string(),
+                validator_address: to.to_string(),
+                amount: Some(coin),
+            }
+            .to_any()?,
+        );
+        if let Some(memo) = memo {
+            payload = payload.memo(memo);
+        }
+
+        let tx = self
+            .sign_and_broadcast(payload, BroadcastMode::Sync)
+            .await?;
+        self.poll_for_tx(tx).await
+    }
+
+    pub async fn unstake(
+        &mut self,
+        to: &str,
+        coin: Coin,
+        memo: Option<&str>,
+    ) -> Result<GetTxResponse, CosmosClientError> {
+        let signer = self.signer()?;
+
+        let mut payload = CosmosTx::build().add_msg(
+            MsgUndelegate {
+                delegator_address: signer.public_address.to_string(),
+                validator_address: to.to_string(),
+                amount: Some(coin),
+            }
+            .to_any()?,
+        );
+        if let Some(memo) = memo {
+            payload = payload.memo(memo);
+        }
+
+        let tx = self
+            .sign_and_broadcast(payload, BroadcastMode::Sync)
+            .await?;
+        self.poll_for_tx(tx).await
+    }
+
+    pub async fn claim_rewards(
+        &mut self,
+        to: &str,
+        memo: Option<&str>,
+    ) -> Result<GetTxResponse, CosmosClientError> {
+        let signer = self.signer()?;
+
+        let mut payload = CosmosTx::build().add_msg(
+            MsgWithdrawDelegatorReward {
+                delegator_address: signer.public_address.to_string(),
+                validator_address: to.to_string(),
+            }
+            .to_any()?,
+        );
+        if let Some(memo) = memo {
+            payload = payload.memo(memo);
+        }
+
+        let tx = self
+            .sign_and_broadcast(payload, BroadcastMode::Sync)
+            .await?;
+        self.poll_for_tx(tx).await
     }
 }

@@ -1,5 +1,5 @@
 use crate::error::CosmosClientError;
-use crate::error::CosmosClientError::ProstDecodeError;
+use crate::error::CosmosClientError::{ProstDecodeError, RpcError};
 use cosmos_sdk_proto::cosmos::bank::v1beta1::{
     MsgSend, QueryAllBalancesRequest, QueryAllBalancesResponse, QueryBalanceRequest,
     QueryBalanceResponse, QueryDenomMetadataRequest, QueryDenomMetadataResponse,
@@ -8,6 +8,7 @@ use cosmos_sdk_proto::cosmos::bank::v1beta1::{
     QuerySupplyOfRequest, QuerySupplyOfResponse, QueryTotalSupplyRequest, QueryTotalSupplyResponse,
 };
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
+use cosmrs::tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};
@@ -40,6 +41,9 @@ impl BankModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryBalanceResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -62,6 +66,9 @@ impl BankModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryAllBalancesResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -84,6 +91,9 @@ impl BankModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QuerySpendableBalancesResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -102,6 +112,9 @@ impl BankModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryTotalSupplyResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -119,6 +132,9 @@ impl BankModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QuerySupplyOfResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -134,6 +150,9 @@ impl BankModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryParamsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -154,6 +173,9 @@ impl BankModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryDenomMetadataResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -172,6 +194,9 @@ impl BankModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryDenomsMetadataResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 

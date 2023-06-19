@@ -1,9 +1,10 @@
 use crate::error::CosmosClientError;
-use crate::error::CosmosClientError::ProstDecodeError;
+use crate::error::CosmosClientError::{ProstDecodeError, RpcError};
 use cosmos_sdk_proto::cosmos::mint::v1beta1::{
     QueryAnnualProvisionsRequest, QueryAnnualProvisionsResponse, QueryInflationRequest,
     QueryInflationResponse, QueryParamsRequest, QueryParamsResponse,
 };
+use cosmrs::tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};
@@ -31,6 +32,9 @@ impl MintModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryAnnualProvisionsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -46,6 +50,9 @@ impl MintModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryInflationResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -61,6 +68,9 @@ impl MintModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryParamsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

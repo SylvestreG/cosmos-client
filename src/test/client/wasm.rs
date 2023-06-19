@@ -44,8 +44,8 @@ mod wasm_tests {
         let contrat = client
             .wasm
             .contract_info("ki1mf6ptkssddfmxvhdx0ech0k03ktp6kf9yk59")
-            .await?;
-        assert_eq!(contrat.contract_info, None);
+            .await;
+        assert!(contrat.is_err());
 
         Ok(())
     }

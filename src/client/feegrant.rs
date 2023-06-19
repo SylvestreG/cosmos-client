@@ -1,9 +1,10 @@
 use crate::error::CosmosClientError;
-use crate::error::CosmosClientError::ProstDecodeError;
+use crate::error::CosmosClientError::{ProstDecodeError, RpcError};
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::feegrant::v1beta1::{
     QueryAllowanceRequest, QueryAllowanceResponse, QueryAllowancesRequest, QueryAllowancesResponse,
 };
+use cosmrs::tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};
@@ -36,6 +37,9 @@ impl FeeGrantModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryAllowanceResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
@@ -58,6 +62,9 @@ impl FeeGrantModule {
             )
             .await?;
 
+        if query.code != Code::Ok {
+            return Err(RpcError(query.log));
+        }
         QueryAllowancesResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 }

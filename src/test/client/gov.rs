@@ -175,9 +175,8 @@ mod gov_tests {
         assert!(client
             .gov
             .deposit(1, "ki1khdhz2ek2h2g8xqggl0p6gyyhkalwu8usr5tl8")
-            .await?
-            .deposit
-            .is_none());
+            .await
+            .is_err());
         Ok(())
     }
 
