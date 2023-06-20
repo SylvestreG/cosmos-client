@@ -4,9 +4,8 @@ workflows:
   test_and_deploy:
     jobs:
       - lint
-      - test:
-          requires:
-            - lint
+      - test
+
 jobs:
   lint:
     docker:
