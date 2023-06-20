@@ -75,7 +75,6 @@ To run the examples, navigate to the examples directory and execute the desired 
 Cargo. For example:
 
 ```bash
-Copy code
 cd examples
 cargo run --example auto_compound
 ```
