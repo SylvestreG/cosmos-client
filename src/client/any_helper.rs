@@ -1,4 +1,4 @@
-use crate::error::CosmosClientError;
+use crate::error::CosmosClient;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmos_sdk_proto::cosmos::crypto::ed25519::PubKey;
 use cosmos_sdk_proto::cosmos::evidence::v1beta1::Equivocation;
@@ -16,7 +16,11 @@ pub enum CosmosType {
     MsgSend(MsgSend),
 }
 
-pub fn any_to_cosmos(cosmos: &Any) -> Result<CosmosType, CosmosClientError> {
+/// # Errors
+///
+/// Will return `Err` if `cosmos` is an unknown cosmos msg is given or if
+/// a decode fail
+pub fn any_to_cosmos(cosmos: &Any) -> Result<CosmosType, CosmosClient> {
     match cosmos.type_url.as_str() {
         "/cosmos.auth.v1beta1.BaseAccount" => Ok(CosmosType::BaseAccount(BaseAccount::decode(
             cosmos.value.as_slice(),
@@ -30,6 +34,6 @@ pub fn any_to_cosmos(cosmos: &Any) -> Result<CosmosType, CosmosClientError> {
         "/cosmos.feegrant.v1beta1.BasicAllowance" => Ok(CosmosType::BasicAllowance(
             BasicAllowance::decode(cosmos.value.as_slice())?,
         )),
-        _ => Err(CosmosClientError::UnknownCosmosMsg),
+        _ => Err(CosmosClient::UnknownCosmosMsg),
     }
 }

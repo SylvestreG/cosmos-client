@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod params_tests {
-    use crate::client::RpcClient;
-    use crate::error::CosmosClientError;
+    use crate::client::Rpc;
+    use crate::error::CosmosClient;
 
     #[tokio::test]
-    async fn evidence() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn evidence() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let params = client.params.params("distribution", "0").await?;
 

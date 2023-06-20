@@ -8,7 +8,7 @@ use std::str::Utf8Error;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum CosmosClientError {
+pub enum CosmosClient {
     #[error("Tendermint RPC Error")]
     TendermintRpcError(#[from] tendermint_rpc::Error),
     #[error("Decode Error")]

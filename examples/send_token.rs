@@ -1,11 +1,11 @@
-use cosmos_client::client::RpcClient;
+use cosmos_client::client::Rpc;
 use cosmos_client::cosmos_sdk::cosmos::base::v1beta1::Coin;
-use cosmos_client::error::CosmosClientError;
+use cosmos_client::error::CosmosClient;
 use cosmos_client::signer::Signer;
 use std::env;
 
 #[tokio::main]
-async fn main() -> Result<(), CosmosClientError> {
+async fn main() -> Result<(), CosmosClient> {
     // ask for 24 workds
     env_logger::init();
 
@@ -16,11 +16,11 @@ async fn main() -> Result<(), CosmosClientError> {
     }
     let input = input.unwrap_or_default();
 
-    let mut client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    let mut client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
     let signer = Signer::from_mnemonic(input.trim(), "ki", "uxki", None, 30, 25000)?;
     let address = signer.public_address.to_string();
     client.attach_signer(signer).await?;
-    println!("signer loaded for {}", address);
+    println!("signer loaded for {address}");
 
     let response = client
         .send(
@@ -32,7 +32,7 @@ async fn main() -> Result<(), CosmosClientError> {
             None,
         )
         .await?;
-    println!("response {:#?}", response);
+    println!("response {response:#?}");
 
     Ok(())
 }

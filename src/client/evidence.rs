@@ -1,5 +1,5 @@
-use crate::error::CosmosClientError;
-use crate::error::CosmosClientError::{ProstDecodeError, RpcError};
+use crate::error::CosmosClient;
+use crate::error::CosmosClient::{ProstDecodeError, RpcError};
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::evidence::v1beta1::{
     QueryAllEvidenceRequest, QueryAllEvidenceResponse, QueryEvidenceRequest, QueryEvidenceResponse,
@@ -9,19 +9,25 @@ use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};
 
-pub struct EvidenceModule {
+pub struct Module {
     rpc: Rc<HttpClient>,
 }
 
-impl EvidenceModule {
+impl Module {
     pub fn new(rpc: Rc<HttpClient>) -> Self {
-        EvidenceModule { rpc }
+        Module { rpc }
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn evidence(
         &self,
         evidence_hash: Vec<u8>,
-    ) -> Result<QueryEvidenceResponse, CosmosClientError> {
+    ) -> Result<QueryEvidenceResponse, CosmosClient> {
         let query = QueryEvidenceRequest { evidence_hash };
         let query = self
             .rpc
@@ -39,10 +45,16 @@ impl EvidenceModule {
         QueryEvidenceResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn all_evidence(
         &self,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryAllEvidenceResponse, CosmosClientError> {
+    ) -> Result<QueryAllEvidenceResponse, CosmosClient> {
         let query = QueryAllEvidenceRequest { pagination };
         let query = self
             .rpc

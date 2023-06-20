@@ -1,5 +1,5 @@
-use crate::error::CosmosClientError;
-use crate::error::CosmosClientError::{ProstDecodeError, RpcError};
+use crate::error::CosmosClient;
+use crate::error::CosmosClient::{ProstDecodeError, RpcError};
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::staking::v1beta1::{
     QueryDelegationRequest, QueryDelegationResponse, QueryDelegatorDelegationsRequest,
@@ -18,19 +18,25 @@ use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};
 
-pub struct StakingModule {
+pub struct Module {
     rpc: Rc<HttpClient>,
 }
 
-impl StakingModule {
+impl Module {
     pub fn new(rpc: Rc<HttpClient>) -> Self {
-        StakingModule { rpc }
+        Module { rpc }
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn validator(
         &self,
         validator_addr: &str,
-    ) -> Result<QueryValidatorResponse, CosmosClientError> {
+    ) -> Result<QueryValidatorResponse, CosmosClient> {
         let query = QueryValidatorRequest {
             validator_addr: validator_addr.to_string(),
         };
@@ -50,11 +56,17 @@ impl StakingModule {
         QueryValidatorResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn validators(
         &self,
         status: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryValidatorsResponse, CosmosClientError> {
+    ) -> Result<QueryValidatorsResponse, CosmosClient> {
         let query = QueryValidatorsRequest {
             status: status.to_string(),
             pagination,
@@ -75,11 +87,17 @@ impl StakingModule {
         QueryValidatorsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn validator_delegations(
         &self,
         validator_addr: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryValidatorDelegationsResponse, CosmosClientError> {
+    ) -> Result<QueryValidatorDelegationsResponse, CosmosClient> {
         let query = QueryValidatorDelegationsRequest {
             validator_addr: validator_addr.to_string(),
             pagination,
@@ -100,11 +118,17 @@ impl StakingModule {
         QueryValidatorDelegationsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn validator_unbonding_delegations(
         &self,
         validator_addr: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryValidatorUnbondingDelegationsResponse, CosmosClientError> {
+    ) -> Result<QueryValidatorUnbondingDelegationsResponse, CosmosClient> {
         let query = QueryValidatorUnbondingDelegationsRequest {
             validator_addr: validator_addr.to_string(),
             pagination,
@@ -126,11 +150,17 @@ impl StakingModule {
             .map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn delegation(
         &self,
         delegator_addr: &str,
         validator_addr: &str,
-    ) -> Result<QueryDelegationResponse, CosmosClientError> {
+    ) -> Result<QueryDelegationResponse, CosmosClient> {
         let query = QueryDelegationRequest {
             delegator_addr: delegator_addr.to_string(),
             validator_addr: validator_addr.to_string(),
@@ -151,11 +181,17 @@ impl StakingModule {
         QueryDelegationResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn unbonding_delegation(
         &self,
         delegator_addr: &str,
         validator_addr: &str,
-    ) -> Result<QueryUnbondingDelegationResponse, CosmosClientError> {
+    ) -> Result<QueryUnbondingDelegationResponse, CosmosClient> {
         let query = QueryUnbondingDelegationRequest {
             delegator_addr: delegator_addr.to_string(),
             validator_addr: validator_addr.to_string(),
@@ -176,11 +212,17 @@ impl StakingModule {
         QueryUnbondingDelegationResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn delegator_delegations(
         &self,
         delegator_addr: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryDelegatorDelegationsResponse, CosmosClientError> {
+    ) -> Result<QueryDelegatorDelegationsResponse, CosmosClient> {
         let query = QueryDelegatorDelegationsRequest {
             delegator_addr: delegator_addr.to_string(),
             pagination,
@@ -201,11 +243,17 @@ impl StakingModule {
         QueryDelegatorDelegationsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn delegator_unbonding_delegations(
         &self,
         delegator_addr: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryDelegatorUnbondingDelegationsResponse, CosmosClientError> {
+    ) -> Result<QueryDelegatorUnbondingDelegationsResponse, CosmosClient> {
         let query = QueryDelegatorUnbondingDelegationsRequest {
             delegator_addr: delegator_addr.to_string(),
             pagination,
@@ -227,13 +275,19 @@ impl StakingModule {
             .map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn redelegations(
         &self,
         delegator_addr: &str,
         src_validator_addr: &str,
         dst_validator_addr: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryRedelegationsResponse, CosmosClientError> {
+    ) -> Result<QueryRedelegationsResponse, CosmosClient> {
         let query = QueryRedelegationsRequest {
             delegator_addr: delegator_addr.to_string(),
             src_validator_addr: src_validator_addr.to_string(),
@@ -256,11 +310,17 @@ impl StakingModule {
         QueryRedelegationsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn delegator_validators(
         &self,
         delegator_addr: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryDelegatorValidatorsResponse, CosmosClientError> {
+    ) -> Result<QueryDelegatorValidatorsResponse, CosmosClient> {
         let query = QueryDelegatorDelegationsRequest {
             delegator_addr: delegator_addr.to_string(),
             pagination,
@@ -281,11 +341,17 @@ impl StakingModule {
         QueryDelegatorValidatorsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn delegator_validator(
         &self,
         delegator_addr: &str,
         validator_addr: &str,
-    ) -> Result<QueryDelegatorValidatorResponse, CosmosClientError> {
+    ) -> Result<QueryDelegatorValidatorResponse, CosmosClient> {
         let query = QueryDelegatorValidatorRequest {
             delegator_addr: delegator_addr.to_string(),
             validator_addr: validator_addr.to_string(),
@@ -306,10 +372,16 @@ impl StakingModule {
         QueryDelegatorValidatorResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn historical_info(
         &self,
         height: i64,
-    ) -> Result<QueryHistoricalInfoResponse, CosmosClientError> {
+    ) -> Result<QueryHistoricalInfoResponse, CosmosClient> {
         let query = QueryHistoricalInfoRequest { height };
         let query = self
             .rpc
@@ -327,7 +399,13 @@ impl StakingModule {
         QueryHistoricalInfoResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
-    pub async fn pool(&self) -> Result<QueryPoolResponse, CosmosClientError> {
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
+    pub async fn pool(&self) -> Result<QueryPoolResponse, CosmosClient> {
         let query = QueryPoolRequest {};
         let query = self
             .rpc
@@ -345,7 +423,13 @@ impl StakingModule {
         QueryPoolResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
-    pub async fn params(&self) -> Result<QueryParamsResponse, CosmosClientError> {
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
+    pub async fn params(&self) -> Result<QueryParamsResponse, CosmosClient> {
         let query = QueryParamsRequest {};
         let query = self
             .rpc

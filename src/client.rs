@@ -15,6 +15,7 @@ pub mod upgrade;
 pub mod wasm;
 
 use crate::client::any_helper::{any_to_cosmos, CosmosType};
+use crate::client::tx::Response;
 use cosmos_sdk_proto::cosmos::bank::v1beta1::MsgSend;
 use cosmos_sdk_proto::cosmos::base::v1beta1::Coin;
 use cosmos_sdk_proto::cosmos::distribution::v1beta1::MsgWithdrawDelegatorReward;
@@ -30,79 +31,78 @@ use std::thread::sleep;
 use std::time::Duration;
 use tendermint_rpc::{Client, HttpClient};
 
-use crate::client::auth::AuthModule;
-use crate::client::authz::AuthzModule;
-use crate::client::bank::BankModule;
-use crate::client::distribution::DistributionModule;
-use crate::client::evidence::EvidenceModule;
-use crate::client::feegrant::FeeGrantModule;
-use crate::client::gov::GovModule;
-use crate::client::mint::MintModule;
-use crate::client::params::ParamsModule;
-use crate::client::slashing::SlashingModule;
-use crate::client::staking::StakingModule;
-use crate::client::tx::{TxModule, TxResponse};
-use crate::client::upgrade::UpgradeModule;
-use crate::client::wasm::WasmModule;
-use crate::error::CosmosClientError;
-use crate::error::CosmosClientError::{AccountDoesNotExistOnChain, NoSignerAttached};
+use crate::error::CosmosClient;
+use crate::error::CosmosClient::{AccountDoesNotExistOnChain, NoSignerAttached};
 use crate::signer::Signer;
-use crate::tx::CosmosTx;
+use crate::tx::Cosmos;
 
-pub struct RpcClient {
+pub struct Rpc {
     chain_id: String,
     signer: Option<Signer>,
     account_id: Option<u64>,
     sequence_id: Option<u64>,
-    pub bank: BankModule,
-    pub auth: AuthModule,
-    pub authz: AuthzModule,
-    pub distribution: DistributionModule,
-    pub evidence: EvidenceModule,
-    pub feegrant: FeeGrantModule,
-    pub gov: GovModule,
-    pub mint: MintModule,
-    pub params: ParamsModule,
-    pub slashing: SlashingModule,
-    pub staking: StakingModule,
-    pub tx: TxModule,
-    pub upgrade: UpgradeModule,
-    pub wasm: WasmModule,
+    pub bank: bank::Module,
+    pub auth: auth::Module,
+    pub authz: authz::Module,
+    pub distribution: distribution::Module,
+    pub evidence: evidence::Module,
+    pub feegrant: feegrant::Module,
+    pub gov: gov::Module,
+    pub mint: mint::Module,
+    pub params: params::Module,
+    pub slashing: slashing::Module,
+    pub staking: staking::Module,
+    pub tx: tx::Module,
+    pub upgrade: upgrade::Module,
+    pub wasm: wasm::Module,
 }
 
-impl RpcClient {
-    pub async fn new(url: &str) -> Result<Self, CosmosClientError> {
+impl Rpc {
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - rpc server is down or invalid
+    pub async fn new(url: &str) -> Result<Self, CosmosClient> {
         let rpc = Rc::new(HttpClient::new(url)?);
 
-        Ok(RpcClient {
+        Ok(Rpc {
             chain_id: rpc.status().await?.node_info.network.to_string(),
             signer: None,
             account_id: None,
             sequence_id: None,
-            auth: AuthModule::new(rpc.clone()),
-            authz: AuthzModule::new(rpc.clone()),
-            bank: BankModule::new(rpc.clone()),
-            distribution: DistributionModule::new(rpc.clone()),
-            evidence: EvidenceModule::new(rpc.clone()),
-            feegrant: FeeGrantModule::new(rpc.clone()),
-            gov: GovModule::new(rpc.clone()),
-            mint: MintModule::new(rpc.clone()),
-            params: ParamsModule::new(rpc.clone()),
-            slashing: SlashingModule::new(rpc.clone()),
-            staking: StakingModule::new(rpc.clone()),
-            tx: TxModule::new(rpc.clone()),
-            upgrade: UpgradeModule::new(rpc.clone()),
-            wasm: WasmModule::new(rpc),
+            auth: auth::Module::new(rpc.clone()),
+            authz: authz::Module::new(rpc.clone()),
+            bank: bank::Module::new(rpc.clone()),
+            distribution: distribution::Module::new(rpc.clone()),
+            evidence: evidence::Module::new(rpc.clone()),
+            feegrant: feegrant::Module::new(rpc.clone()),
+            gov: gov::Module::new(rpc.clone()),
+            mint: mint::Module::new(rpc.clone()),
+            params: params::Module::new(rpc.clone()),
+            slashing: slashing::Module::new(rpc.clone()),
+            staking: staking::Module::new(rpc.clone()),
+            tx: tx::Module::new(rpc.clone()),
+            upgrade: upgrade::Module::new(rpc.clone()),
+            wasm: wasm::Module::new(rpc),
         })
     }
 
-    pub async fn attach_signer(&mut self, signer: Signer) -> Result<(), CosmosClientError> {
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - we cannot update `sequence_id` for `signer`
+    pub async fn attach_signer(&mut self, signer: Signer) -> Result<(), CosmosClient> {
         self.signer = Some(signer);
         self.update_sequence_id().await?;
         Ok(())
     }
 
-    pub async fn update_sequence_id(&mut self) -> Result<(), CosmosClientError> {
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - there is no signer attached
+    /// - cosmos `account` endpoint fails
+    pub async fn update_sequence_id(&mut self) -> Result<(), CosmosClient> {
         let signer = self.signer()?;
 
         let account = self
@@ -122,7 +122,13 @@ impl RpcClient {
         })
     }
 
-    pub async fn sign(&mut self, tx: CosmosTx) -> Result<Vec<u8>, CosmosClientError> {
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - there is no signer attached
+    /// - cosmos `simulate` endpoint fails
+    /// - the is a sign or encode error
+    pub async fn sign(&mut self, tx: Cosmos) -> Result<Vec<u8>, CosmosClient> {
         let account_id = self.account_id.ok_or(AccountDoesNotExistOnChain {
             address: self.signer()?.public_address.to_string(),
         })?;
@@ -154,7 +160,7 @@ impl RpcClient {
         let tx = self.tx.simulate(tx_raw.to_bytes()?).await?;
 
         if tx.gas_info.is_none() {
-            return Err(CosmosClientError::CannotSimulateTxGasFee);
+            return Err(CosmosClient::CannotSimulateTxGasFee);
         }
 
         let mut gas_info = tx.gas_info.unwrap_or_default().gas_used;
@@ -181,33 +187,41 @@ impl RpcClient {
         Ok(sign_doc.sign(&signer.private_key)?.to_bytes()?)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - cosmos `tx` broadcast endpoint fails
     pub async fn broadcast(
         &mut self,
         payload: Vec<u8>,
         mode: BroadcastMode,
-    ) -> Result<TxResponse, CosmosClientError> {
+    ) -> Result<Response, CosmosClient> {
         self.tx.broadcast(payload, mode).await
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - sign or broadcast fails
     pub async fn sign_and_broadcast(
         &mut self,
-        tx: CosmosTx,
+        tx: Cosmos,
         mode: BroadcastMode,
-    ) -> Result<TxResponse, CosmosClientError> {
+    ) -> Result<Response, CosmosClient> {
         let payload = self.sign(tx).await?;
 
         self.tx.broadcast(payload, mode).await
     }
 
-    fn signer(&self) -> Result<&Signer, CosmosClientError> {
+    fn signer(&self) -> Result<&Signer, CosmosClient> {
         self.signer.as_ref().ok_or(NoSignerAttached)
     }
 
-    async fn poll_for_tx(&self, tx: TxResponse) -> Result<GetTxResponse, CosmosClientError> {
+    async fn poll_for_tx(&self, tx: Response) -> Result<GetTxResponse, CosmosClient> {
         let hash = match tx {
-            TxResponse::Sync(tx) => tx.hash,
-            TxResponse::Async(tx) => tx.hash,
-            TxResponse::Commit(tx) => tx.hash,
+            Response::Sync(tx) => tx.hash,
+            Response::Async(tx) => tx.hash,
+            Response::Commit(tx) => tx.hash,
         };
 
         for _ in 0..60 {
@@ -219,18 +233,24 @@ impl RpcClient {
             sleep(Duration::from_secs(3));
         }
 
-        Err(CosmosClientError::TXPollingTimeout)
+        Err(CosmosClient::TXPollingTimeout)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - `sign_and_broadcast` returns an err
+    /// - cannot find the hash of the tx on chain after 60'
+    /// - cannot Serialize `MsgSend`
     pub async fn send(
         &mut self,
         to: &str,
         coin: Vec<Coin>,
         memo: Option<&str>,
-    ) -> Result<GetTxResponse, CosmosClientError> {
+    ) -> Result<GetTxResponse, CosmosClient> {
         let signer = self.signer()?;
 
-        let mut payload = CosmosTx::build().add_msg(
+        let mut payload = Cosmos::build().add_msg(
             MsgSend {
                 from_address: signer.public_address.to_string(),
                 to_address: to.to_string(),
@@ -248,15 +268,21 @@ impl RpcClient {
         self.poll_for_tx(tx).await
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - `sign_and_broadcast` returns an err
+    /// - cannot find the hash of the tx on chain after 60'
+    /// - cannot Serialize `MsgDelegate`
     pub async fn stake(
         &mut self,
         to: &str,
         coin: Coin,
         memo: Option<&str>,
-    ) -> Result<GetTxResponse, CosmosClientError> {
+    ) -> Result<GetTxResponse, CosmosClient> {
         let signer = self.signer()?;
 
-        let mut payload = CosmosTx::build().add_msg(
+        let mut payload = Cosmos::build().add_msg(
             MsgDelegate {
                 delegator_address: signer.public_address.to_string(),
                 validator_address: to.to_string(),
@@ -274,15 +300,21 @@ impl RpcClient {
         self.poll_for_tx(tx).await
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - `sign_and_broadcast` returns an err
+    /// - cannot find the hash of the tx on chain after 60'
+    /// - cannot Serialize `MsgUndelegate`
     pub async fn unstake(
         &mut self,
         to: &str,
         coin: Coin,
         memo: Option<&str>,
-    ) -> Result<GetTxResponse, CosmosClientError> {
+    ) -> Result<GetTxResponse, CosmosClient> {
         let signer = self.signer()?;
 
-        let mut payload = CosmosTx::build().add_msg(
+        let mut payload = Cosmos::build().add_msg(
             MsgUndelegate {
                 delegator_address: signer.public_address.to_string(),
                 validator_address: to.to_string(),
@@ -300,14 +332,20 @@ impl RpcClient {
         self.poll_for_tx(tx).await
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - `sign_and_broadcast` returns an err
+    /// - cannot find the hash of the tx on chain after 60'
+    /// - cannot Serialize `MsgWithdrawDelegatorReward`
     pub async fn claim_rewards(
         &mut self,
         to: &str,
         memo: Option<&str>,
-    ) -> Result<GetTxResponse, CosmosClientError> {
+    ) -> Result<GetTxResponse, CosmosClient> {
         let signer = self.signer()?;
 
-        let mut payload = CosmosTx::build().add_msg(
+        let mut payload = Cosmos::build().add_msg(
             MsgWithdrawDelegatorReward {
                 delegator_address: signer.public_address.to_string(),
                 validator_address: to.to_string(),

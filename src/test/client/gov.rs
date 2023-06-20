@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod gov_tests {
-    use crate::client::RpcClient;
-    use crate::error::CosmosClientError;
+    use crate::client::Rpc;
+    use crate::error::CosmosClient;
     use cosmos_sdk_proto::cosmos::base::v1beta1::Coin;
     use cosmos_sdk_proto::cosmos::gov::v1beta1::{
         DepositParams, QueryParamsResponse, TallyParams, TallyResult, VotingParams,
@@ -10,8 +10,8 @@ mod gov_tests {
     use std::str::FromStr;
 
     #[tokio::test]
-    async fn proposals() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn proposals() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let proposals = client.gov.proposals(0, "", "", None).await?;
         assert!(proposals.proposals.len() >= 2);
@@ -19,8 +19,8 @@ mod gov_tests {
     }
 
     #[tokio::test]
-    async fn proposal() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn proposal() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let proposal = client.gov.proposal(1).await?;
         assert!(proposal.proposal.is_some());
@@ -71,8 +71,8 @@ mod gov_tests {
     }
 
     #[tokio::test]
-    async fn votes() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn votes() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let votes = client.gov.votes(2, None).await?;
         assert!(votes.votes.is_empty());
@@ -80,8 +80,8 @@ mod gov_tests {
     }
 
     #[tokio::test]
-    async fn params() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn params() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let tallying = client.gov.params("tallying").await?;
         let deposit = client.gov.params("deposit").await?;
@@ -121,7 +121,7 @@ mod gov_tests {
             QueryParamsResponse {
                 voting_params: Some(VotingParams {
                     voting_period: Some(Duration {
-                        seconds: 259200,
+                        seconds: 259_200,
                         nanos: 0
                     }),
                 }),
@@ -154,7 +154,7 @@ mod gov_tests {
                         amount: 500_000_000_000u128.to_string(),
                     },],
                     max_deposit_period: Some(Duration {
-                        seconds: 172800,
+                        seconds: 172_800,
                         nanos: 0
                     }),
                 }),
@@ -169,8 +169,8 @@ mod gov_tests {
     }
 
     #[tokio::test]
-    async fn deposit() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn deposit() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         assert!(client
             .gov
@@ -181,8 +181,8 @@ mod gov_tests {
     }
 
     #[tokio::test]
-    async fn deposits() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn deposits() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let deposits = client.gov.deposits(1, None).await?;
         assert!(deposits.deposits.is_empty());
@@ -190,8 +190,8 @@ mod gov_tests {
     }
 
     #[tokio::test]
-    async fn tally() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn tally() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let tally = client.gov.tally_result(2).await?;
         assert!(tally.tally.is_some());
