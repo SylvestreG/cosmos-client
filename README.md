@@ -65,7 +65,7 @@ async fn main() -> Result<(), CosmosClient> {
 Please note that this is a simplified example and may not cover all available functionality.
 Refer to the documentation and examples for more advanced usage and features.
 
-##Examples
+## Examples
 The CosmosClient project includes an examples directory that contains various examples showcasing the usage of the
 library. These examples are designed to help developers quickly understand and utilize the different features and
 functionalities provided by CosmosClient.
