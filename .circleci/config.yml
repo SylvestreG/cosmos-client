@@ -55,7 +55,7 @@ jobs:
           name: Unit Tests
           environment:
             RUST_BACKTRACE: 1
-          command: cargo test --locked
+          command: cargo test
       - run:
           name: Add clippy component
           command: rustup component add clippy
