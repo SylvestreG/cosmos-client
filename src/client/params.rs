@@ -1,25 +1,31 @@
-use crate::error::CosmosClientError;
-use crate::error::CosmosClientError::{ProstDecodeError, RpcError};
+use crate::error::CosmosClient;
+use crate::error::CosmosClient::{ProstDecodeError, RpcError};
 use cosmos_sdk_proto::cosmos::params::v1beta1::{QueryParamsRequest, QueryParamsResponse};
 use cosmrs::tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};
 
-pub struct ParamsModule {
+pub struct Module {
     rpc: Rc<HttpClient>,
 }
 
-impl ParamsModule {
+impl Module {
     pub fn new(rpc: Rc<HttpClient>) -> Self {
-        ParamsModule { rpc }
+        Module { rpc }
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn params(
         &self,
         subspace: &str,
         key: &str,
-    ) -> Result<QueryParamsResponse, CosmosClientError> {
+    ) -> Result<QueryParamsResponse, CosmosClient> {
         let query = QueryParamsRequest {
             subspace: subspace.to_string(),
             key: key.to_string(),

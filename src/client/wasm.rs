@@ -1,5 +1,5 @@
-use crate::error::CosmosClientError;
-use crate::error::CosmosClientError::{ProstDecodeError, RpcError};
+use crate::error::CosmosClient;
+use crate::error::CosmosClient::{ProstDecodeError, RpcError};
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmwasm::wasm::v1::{
     QueryAllContractStateRequest, QueryAllContractStateResponse, QueryCodeRequest,
@@ -16,19 +16,25 @@ use serde::Serialize;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};
 
-pub struct WasmModule {
+pub struct Module {
     rpc: Rc<HttpClient>,
 }
 
-impl WasmModule {
+impl Module {
     pub fn new(rpc: Rc<HttpClient>) -> Self {
-        WasmModule { rpc }
+        Module { rpc }
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn contract_info(
         &self,
         address: &str,
-    ) -> Result<QueryContractInfoResponse, CosmosClientError> {
+    ) -> Result<QueryContractInfoResponse, CosmosClient> {
         let query = QueryContractInfoRequest {
             address: address.to_string(),
         };
@@ -48,11 +54,17 @@ impl WasmModule {
         QueryContractInfoResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn contract_history(
         &self,
         address: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryContractHistoryResponse, CosmosClientError> {
+    ) -> Result<QueryContractHistoryResponse, CosmosClient> {
         let query = QueryContractHistoryRequest {
             address: address.to_string(),
             pagination,
@@ -73,11 +85,17 @@ impl WasmModule {
         QueryContractHistoryResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn contracts_by_code(
         &self,
         code_id: u64,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryContractsByCodeResponse, CosmosClientError> {
+    ) -> Result<QueryContractsByCodeResponse, CosmosClient> {
         let query = QueryContractsByCodeRequest {
             code_id,
             pagination,
@@ -98,11 +116,17 @@ impl WasmModule {
         QueryContractsByCodeResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn all_contract_state(
         &self,
         address: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryAllContractStateResponse, CosmosClientError> {
+    ) -> Result<QueryAllContractStateResponse, CosmosClient> {
         let query = QueryAllContractStateRequest {
             address: address.to_string(),
             pagination,
@@ -123,11 +147,17 @@ impl WasmModule {
         QueryAllContractStateResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn raw_contract_state(
         &self,
         address: &str,
         query_data: Vec<u8>,
-    ) -> Result<QueryRawContractStateResponse, CosmosClientError> {
+    ) -> Result<QueryRawContractStateResponse, CosmosClient> {
         let query = QueryRawContractStateRequest {
             address: address.to_string(),
             query_data,
@@ -148,11 +178,18 @@ impl WasmModule {
         QueryRawContractStateResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
+    /// - a Json Serialize Deserialize error
     pub async fn smart_contract_state<T: Serialize + Clone, U: DeserializeOwned>(
         &self,
         address: &str,
         msg: T,
-    ) -> Result<U, CosmosClientError> {
+    ) -> Result<U, CosmosClient> {
         let query = QuerySmartContractStateRequest {
             address: address.to_string(),
             query_data: serde_json::to_vec(&msg)?,
@@ -173,10 +210,16 @@ impl WasmModule {
         let resp: QueryRawContractStateResponse =
             QueryRawContractStateResponse::decode(ret.value.as_slice())?;
 
-        serde_json::from_slice::<U>(resp.data.as_slice()).map_err(CosmosClientError::JsonError)
+        serde_json::from_slice::<U>(resp.data.as_slice()).map_err(CosmosClient::JsonError)
     }
 
-    pub async fn code(&self, code_id: u64) -> Result<QueryCodeResponse, CosmosClientError> {
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
+    pub async fn code(&self, code_id: u64) -> Result<QueryCodeResponse, CosmosClient> {
         let query = QueryCodeRequest { code_id };
         let query = self
             .rpc
@@ -194,10 +237,16 @@ impl WasmModule {
         QueryCodeResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn codes(
         &self,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryCodesResponse, CosmosClientError> {
+    ) -> Result<QueryCodesResponse, CosmosClient> {
         let query = QueryCodesRequest { pagination };
         let query = self
             .rpc
@@ -215,10 +264,16 @@ impl WasmModule {
         QueryCodesResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn pinned_codes(
         &self,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryPinnedCodesResponse, CosmosClientError> {
+    ) -> Result<QueryPinnedCodesResponse, CosmosClient> {
         let query = QueryPinnedCodesRequest { pagination };
         let query = self
             .rpc

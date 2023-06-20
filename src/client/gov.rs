@@ -1,5 +1,5 @@
-use crate::error::CosmosClientError;
-use crate::error::CosmosClientError::{ProstDecodeError, RpcError};
+use crate::error::CosmosClient;
+use crate::error::CosmosClient::{ProstDecodeError, RpcError};
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use cosmos_sdk_proto::cosmos::gov::v1beta1::{
     QueryDepositRequest, QueryDepositResponse, QueryDepositsRequest, QueryDepositsResponse,
@@ -13,19 +13,22 @@ use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};
 
-pub struct GovModule {
+pub struct Module {
     rpc: Rc<HttpClient>,
 }
 
-impl GovModule {
+impl Module {
     pub fn new(rpc: Rc<HttpClient>) -> Self {
-        GovModule { rpc }
+        Module { rpc }
     }
 
-    pub async fn proposal(
-        &self,
-        proposal_id: u64,
-    ) -> Result<QueryProposalResponse, CosmosClientError> {
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
+    pub async fn proposal(&self, proposal_id: u64) -> Result<QueryProposalResponse, CosmosClient> {
         let query = QueryProposalRequest { proposal_id };
         let query = self
             .rpc
@@ -43,13 +46,19 @@ impl GovModule {
         QueryProposalResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn proposals(
         &self,
         proposal_status: i32,
         voter: &str,
         depositor: &str,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryProposalsResponse, CosmosClientError> {
+    ) -> Result<QueryProposalsResponse, CosmosClient> {
         let query = QueryProposalsRequest {
             proposal_status,
             voter: voter.to_string(),
@@ -72,11 +81,17 @@ impl GovModule {
         QueryProposalsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn vote(
         &self,
         proposal_id: u64,
         voter: &str,
-    ) -> Result<QueryVoteResponse, CosmosClientError> {
+    ) -> Result<QueryVoteResponse, CosmosClient> {
         let query = QueryVoteRequest {
             proposal_id,
             voter: voter.to_string(),
@@ -97,11 +112,17 @@ impl GovModule {
         QueryVoteResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn votes(
         &self,
         proposal_id: u64,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryVotesResponse, CosmosClientError> {
+    ) -> Result<QueryVotesResponse, CosmosClient> {
         let query = QueryVotesRequest {
             proposal_id,
             pagination,
@@ -122,10 +143,13 @@ impl GovModule {
         QueryVotesResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
-    pub async fn params(
-        &self,
-        params_type: &str,
-    ) -> Result<QueryParamsResponse, CosmosClientError> {
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
+    pub async fn params(&self, params_type: &str) -> Result<QueryParamsResponse, CosmosClient> {
         let query = QueryParamsRequest {
             params_type: params_type.to_string(),
         };
@@ -145,11 +169,17 @@ impl GovModule {
         QueryParamsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn deposit(
         &self,
         proposal_id: u64,
         depositor: &str,
-    ) -> Result<QueryDepositResponse, CosmosClientError> {
+    ) -> Result<QueryDepositResponse, CosmosClient> {
         let query = QueryDepositRequest {
             proposal_id,
             depositor: depositor.to_string(),
@@ -170,11 +200,17 @@ impl GovModule {
         QueryDepositResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn deposits(
         &self,
         proposal_id: u64,
         pagination: Option<PageRequest>,
-    ) -> Result<QueryDepositsResponse, CosmosClientError> {
+    ) -> Result<QueryDepositsResponse, CosmosClient> {
         let query = QueryDepositsRequest {
             proposal_id,
             pagination,
@@ -195,10 +231,16 @@ impl GovModule {
         QueryDepositsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
     pub async fn tally_result(
         &self,
         proposal_id: u64,
-    ) -> Result<QueryTallyResultResponse, CosmosClientError> {
+    ) -> Result<QueryTallyResultResponse, CosmosClient> {
         let query = QueryTallyResultRequest { proposal_id };
         let query = self
             .rpc

@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod distribution_tests {
-    use crate::client::RpcClient;
-    use crate::error::CosmosClientError;
+    use crate::client::Rpc;
+    use crate::error::CosmosClient;
 
     #[tokio::test]
-    async fn params() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn params() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let params = client.distribution.params().await?;
         assert!(params.params.is_some());
@@ -18,8 +18,8 @@ mod distribution_tests {
     }
 
     #[tokio::test]
-    async fn community_pool() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn community_pool() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let pool = client.distribution.community_pool().await?;
         assert!(!pool.pool.is_empty());
@@ -28,8 +28,8 @@ mod distribution_tests {
     }
 
     #[tokio::test]
-    async fn validator_outstanding_rewards() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn validator_outstanding_rewards() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let outstanding_rewards = client
             .distribution

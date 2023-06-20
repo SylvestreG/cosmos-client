@@ -1,4 +1,4 @@
-use crate::error::CosmosClientError;
+use crate::error::CosmosClient;
 use cosmrs::bip32::{Language, Mnemonic, XPrv};
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::crypto::PublicKey;
@@ -21,7 +21,7 @@ impl Signer {
         phrase: &str,
         prefix: &str,
         derivation: Option<&str>,
-    ) -> Result<(SigningKey, PublicKey, AccountId), CosmosClientError> {
+    ) -> Result<(SigningKey, PublicKey, AccountId), CosmosClient> {
         let derivation = if let Some(derivation) = derivation {
             derivation
         } else {
@@ -37,13 +37,18 @@ impl Signer {
         Ok((private_key, public_key, public_address))
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - we cannot parse the derivation
+    /// - if the prefix is bad
     pub fn generate(
         prefix: &str,
         denom: &str,
         derivation: Option<&str>,
         gas_adjustment_percent: u8,
         gas_price: u128,
-    ) -> Result<Self, CosmosClientError> {
+    ) -> Result<Self, CosmosClient> {
         let mnemonic = Mnemonic::random(OsRng, Language::English);
         let (private_key, public_key, public_address) =
             Signer::load_from_mnemonic(mnemonic.phrase(), prefix, derivation)?;
@@ -59,13 +64,19 @@ impl Signer {
         })
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - the private key is invalid
+    /// - we cannot parse the derivation
+    /// - if the prefix is bad
     pub fn from_pkey(
         private_key: &str,
         prefix: &str,
         denom: &str,
         gas_adjustment_percent: u8,
         gas_price: u128,
-    ) -> Result<Self, CosmosClientError> {
+    ) -> Result<Self, CosmosClient> {
         let private_key = SigningKey::from_slice(decode(private_key)?.as_slice())?;
         let public_key = private_key.public_key();
         let public_address = public_key.account_id(prefix)?;
@@ -81,6 +92,12 @@ impl Signer {
         })
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - mnemonic is invalid
+    /// - we cannot parse the derivation
+    /// - if the prefix is bad
     pub fn from_mnemonic(
         phrase: &str,
         prefix: &str,
@@ -88,7 +105,7 @@ impl Signer {
         derivation: Option<&str>,
         gas_adjustment_percent: u8,
         gas_price: u128,
-    ) -> Result<Self, CosmosClientError> {
+    ) -> Result<Self, CosmosClient> {
         let (private_key, public_key, public_address) =
             Signer::load_from_mnemonic(phrase, prefix, derivation)?;
 

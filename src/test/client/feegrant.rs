@@ -1,14 +1,14 @@
 #[cfg(test)]
 mod feegrant_tests {
     use crate::client::any_helper::{any_to_cosmos, CosmosType};
-    use crate::client::RpcClient;
-    use crate::error::CosmosClientError;
+    use crate::client::Rpc;
+    use crate::error::CosmosClient;
     use cosmos_sdk_proto::cosmos::base::v1beta1::Coin;
     use std::str::FromStr;
 
     #[tokio::test]
-    async fn allowance() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn allowance() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let allowance = client
             .feegrant

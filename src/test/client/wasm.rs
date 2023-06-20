@@ -1,14 +1,12 @@
 #[cfg(test)]
 mod wasm_tests {
-    use crate::client::RpcClient;
-    use cosmos_sdk_proto::cosmwasm::wasm::v1::{
-        AccessConfig, AccessType, ContractCodeHistoryOperationType,
-    };
+    use crate::client::Rpc;
+    use cosmos_sdk_proto::cosmwasm::wasm::v1::{AccessConfig, ContractCodeHistoryOperationType};
     use serde::{Deserialize, Serialize};
 
     #[tokio::test]
-    async fn contract() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn contract() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let contrat = client
             .wasm
@@ -38,8 +36,8 @@ mod wasm_tests {
     }
 
     #[tokio::test]
-    async fn bad_contract() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn bad_contract() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let contrat = client
             .wasm
@@ -51,8 +49,8 @@ mod wasm_tests {
     }
 
     #[tokio::test]
-    async fn contract_history() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn contract_history() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let history = client
             .wasm
@@ -108,8 +106,8 @@ mod wasm_tests {
     }
 
     #[tokio::test]
-    async fn contract_by_code_id() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn contract_by_code_id() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let contracts = client.wasm.contracts_by_code(35, None).await?;
         assert!(!contracts.contracts.is_empty());
@@ -121,8 +119,8 @@ mod wasm_tests {
     }
 
     #[tokio::test]
-    async fn code() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn code() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let code = client.wasm.code(35).await?;
         assert!(code.code_info.is_some());
@@ -142,21 +140,21 @@ mod wasm_tests {
         assert_eq!(
             code_info.instantiate_permission,
             Some(AccessConfig {
-                permission: AccessType::Everybody.into(),
-                address: "".to_string(),
+                permission: Everybody.into(),
+                address: String::new(),
                 addresses: vec![]
             })
         );
         Ok(())
     }
 
-    use crate::error::CosmosClientError;
+    use crate::error::CosmosClient;
     use cosmos_sdk_proto::cosmwasm::wasm::v1::AccessType::Everybody;
     use std::str;
 
     #[tokio::test]
-    async fn codes() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn codes() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let codes = client.wasm.codes(None).await?;
 
@@ -173,7 +171,7 @@ mod wasm_tests {
             codes.code_infos[22].instantiate_permission,
             Some(AccessConfig {
                 permission: Everybody.into(),
-                address: "".to_string(),
+                address: String::new(),
                 addresses: vec![]
             })
         );
@@ -185,8 +183,8 @@ mod wasm_tests {
     }
 
     #[tokio::test]
-    async fn pinned_codes() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn pinned_codes() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let codes = client.wasm.pinned_codes(None).await?;
         assert!(codes.code_ids.is_empty());
@@ -200,8 +198,8 @@ mod wasm_tests {
     }
 
     #[tokio::test]
-    async fn query_smart() -> Result<(), CosmosClientError> {
-        let client = RpcClient::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
+    async fn query_smart() -> Result<(), CosmosClient> {
+        let client = Rpc::new("https://rpc-kichain-ia.cosmosia.notional.ventures/").await?;
 
         let max_decks: u64 = client
             .wasm

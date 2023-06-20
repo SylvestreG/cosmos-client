@@ -1,5 +1,5 @@
-use crate::error::CosmosClientError;
-use crate::error::CosmosClientError::{ProstDecodeError, RpcError};
+use crate::error::CosmosClient;
+use crate::error::CosmosClient::{ProstDecodeError, RpcError};
 use cosmos_sdk_proto::cosmos::mint::v1beta1::{
     QueryAnnualProvisionsRequest, QueryAnnualProvisionsResponse, QueryInflationRequest,
     QueryInflationResponse, QueryParamsRequest, QueryParamsResponse,
@@ -9,18 +9,22 @@ use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};
 
-pub struct MintModule {
+pub struct Module {
     rpc: Rc<HttpClient>,
 }
 
-impl MintModule {
+impl Module {
     pub fn new(rpc: Rc<HttpClient>) -> Self {
-        MintModule { rpc }
+        Module { rpc }
     }
 
-    pub async fn annual_provisions(
-        &self,
-    ) -> Result<QueryAnnualProvisionsResponse, CosmosClientError> {
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
+    pub async fn annual_provisions(&self) -> Result<QueryAnnualProvisionsResponse, CosmosClient> {
         let query = QueryAnnualProvisionsRequest {};
         let query = self
             .rpc
@@ -38,7 +42,13 @@ impl MintModule {
         QueryAnnualProvisionsResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
-    pub async fn inflation(&self) -> Result<QueryInflationResponse, CosmosClientError> {
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
+    pub async fn inflation(&self) -> Result<QueryInflationResponse, CosmosClient> {
         let query = QueryInflationRequest {};
         let query = self
             .rpc
@@ -56,7 +66,13 @@ impl MintModule {
         QueryInflationResponse::decode(query.value.as_slice()).map_err(ProstDecodeError)
     }
 
-    pub async fn params(&self) -> Result<QueryParamsResponse, CosmosClientError> {
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - a prost encode / decode fail
+    /// - the json-rpc return an error code
+    /// - if there is some network error
+    pub async fn params(&self) -> Result<QueryParamsResponse, CosmosClient> {
         let query = QueryParamsRequest {};
         let query = self
             .rpc

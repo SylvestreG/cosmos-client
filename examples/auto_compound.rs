@@ -1,11 +1,11 @@
-use cosmos_client::client::RpcClient;
-use cosmos_client::error::CosmosClientError;
+use cosmos_client::client::Rpc;
+use cosmos_client::cosmos_sdk::cosmos::base::v1beta1::{Coin, DecCoin};
+use cosmos_client::error::CosmosClient;
 use cosmos_client::signer::Signer;
-use cosmos_sdk_proto::cosmos::base::v1beta1::{Coin, DecCoin};
 use std::env;
 
 #[tokio::main]
-async fn main() -> Result<(), CosmosClientError> {
+async fn main() -> Result<(), CosmosClient> {
     // ask for 24 workds
     env_logger::init();
 
@@ -16,11 +16,11 @@ async fn main() -> Result<(), CosmosClientError> {
     }
     let input = input.unwrap_or_default();
 
-    let mut client = RpcClient::new("https://rpc-mainnet.blockchain.ki").await?;
+    let mut client = Rpc::new("https://rpc-mainnet.blockchain.ki").await?;
     let signer = Signer::from_mnemonic(input.trim(), "ki", "uxki", None, 30, 25000)?;
     let address = signer.public_address.to_string();
     client.attach_signer(signer).await?;
-    println!("signer loaded for {}", address);
+    println!("signer loaded for {address}");
 
     let validators = client
         .staking
@@ -51,13 +51,13 @@ async fn main() -> Result<(), CosmosClientError> {
         for reward in rewards {
             let uxki_to_claim = reward.amount.parse::<u128>()? / 1_000_000_000_000_000_000u128;
             if uxki_to_claim > 0 {
-                println!("claiming {}uxki on {}", uxki_to_claim, valop);
+                println!("claiming {uxki_to_claim} uxki on {valop}");
                 let tx = client
                     .claim_rewards(valop.as_str(), Some("AutoClaim"))
                     .await?;
                 println!("Tx hash {}", tx.tx_response.unwrap().txhash);
 
-                println!("staking {}uxki on {}", uxki_to_claim, valop);
+                println!("staking {uxki_to_claim} uxki on {valop}");
                 let tx = client
                     .stake(
                         valop.as_str(),
