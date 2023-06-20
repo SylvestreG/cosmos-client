@@ -1,6 +1,7 @@
 # CosmosClient
 
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/SylvestreG/cosmos-client/tree/master.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/SylvestreG/cosmos-client/tree/master)
+![Dependabot](https://img.shields.io/badge/Dependabot-enabled-brightgreen.svg)
 
 CosmosClient is a Rust RPC and signing client for Cosmos SDK, inspired by cosmjs in JavaScript. It is built on top of
 cosmrs and aims to provide a simplified and user-friendly interface for interacting with the Cosmos SDK blockchain.
