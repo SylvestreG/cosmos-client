@@ -24,7 +24,7 @@ tokio = { version = "1", features = ["full"] }
 cosmos_client = "0.1"
 ```
 
-Getting Started
+## Getting Started
 Here's a quick example to get you started with CosmosClient:
 
 ```rust
