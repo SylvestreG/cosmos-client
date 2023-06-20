@@ -32,13 +32,9 @@ use cosmos_client::client::Rpc;
 use cosmos_client::cosmos_sdk::cosmos::base::v1beta1::Coin;
 use cosmos_client::error::CosmosClient;
 use cosmos_client::signer::Signer;
-use std::env;
 
 #[tokio::main]
 async fn main() -> Result<(), CosmosClient> {
-    // ask for 24 words
-    env_logger::init();
-
     let mut client = Rpc::new("https://rpc-cosmoshub-ia.cosmosia.notional.ventures/").await?;
     let signer = Signer::from_mnemonic("PUT your 24 words Here", "cosmos", "uatom", None, 30, 25_000)?;
     let address = signer.public_address.to_string();
