@@ -65,6 +65,27 @@ async fn main() -> Result<(), CosmosClient> {
 Please note that this is a simplified example and may not cover all available functionality.
 Refer to the documentation and examples for more advanced usage and features.
 
+##Examples
+The CosmosClient project includes an examples directory that contains various examples showcasing the usage of the
+library. These examples are designed to help developers quickly understand and utilize the different features and
+functionalities provided by CosmosClient.
+
+
+To run the examples, navigate to the examples directory and execute the desired example using the Rust package manager,
+Cargo. For example:
+
+```bash
+Copy code
+cd examples
+cargo run --example auto_compound
+```
+
+Feel free to modify and experiment with the examples to suit your specific needs. They serve as a great starting point
+for building your own applications on top of CosmosClient.
+
+For more information on the available examples and their usage, refer to the documentation or directly explore the
+source code in the `examples` directory.
+
 # Documentation
 
 For detailed usage instructions, API reference, and examples, please refer to the CosmosClient Documentation.
