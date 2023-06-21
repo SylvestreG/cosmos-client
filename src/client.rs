@@ -21,6 +21,8 @@ use cosmos_sdk_proto::cosmos::base::v1beta1::Coin;
 use cosmos_sdk_proto::cosmos::distribution::v1beta1::MsgWithdrawDelegatorReward;
 use cosmos_sdk_proto::cosmos::staking::v1beta1::{MsgDelegate, MsgUndelegate};
 use cosmos_sdk_proto::cosmos::tx::v1beta1::{BroadcastMode, GetTxResponse};
+use cosmos_sdk_proto::ibc::applications::transfer::v1::MsgTransfer;
+use cosmos_sdk_proto::ibc::core::client::v1::Height;
 use cosmos_sdk_proto::traits::MessageExt;
 use cosmrs::tendermint::chain;
 use cosmrs::tx::{Fee, SignDoc, SignerInfo};
@@ -29,8 +31,6 @@ use std::rc::Rc;
 use std::str::FromStr;
 use std::thread::sleep;
 use std::time::Duration;
-use cosmos_sdk_proto::ibc::applications::transfer::v1::MsgTransfer;
-use cosmos_sdk_proto::ibc::core::client::v1::Height;
 use tendermint_rpc::{Client, HttpClient};
 
 use crate::error::CosmosClient;
@@ -393,7 +393,7 @@ impl Rpc {
                 timeout_height,
                 timeout_timestamp,
             }
-                .to_any()?,
+            .to_any()?,
         );
         if let Some(memo) = memo {
             payload = payload.memo(memo);
