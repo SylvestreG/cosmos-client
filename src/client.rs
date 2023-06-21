@@ -29,6 +29,8 @@ use std::rc::Rc;
 use std::str::FromStr;
 use std::thread::sleep;
 use std::time::Duration;
+use cosmos_sdk_proto::ibc::applications::transfer::v1::MsgTransfer;
+use cosmos_sdk_proto::ibc::core::client::v1::Height;
 use tendermint_rpc::{Client, HttpClient};
 
 use crate::error::CosmosClient;
@@ -351,6 +353,47 @@ impl Rpc {
                 validator_address: to.to_string(),
             }
             .to_any()?,
+        );
+        if let Some(memo) = memo {
+            payload = payload.memo(memo);
+        }
+
+        let tx = self
+            .sign_and_broadcast(payload, BroadcastMode::Sync)
+            .await?;
+        self.poll_for_tx(tx).await
+    }
+
+    /// # Errors
+    ///
+    /// Will return `Err` if :
+    /// - `sign_and_broadcast` returns an err
+    /// - cannot find the hash of the tx on chain after 60'
+    /// - cannot Serialize `MsgWithdrawDelegatorReward`
+    #[allow(clippy::too_many_arguments)]
+    pub async fn ibc_send(
+        &mut self,
+        to: &str,
+        coin: Coin,
+        source_port: &str,
+        source_channel: &str,
+        timeout_height: Option<Height>,
+        timeout_timestamp: u64,
+        memo: Option<&str>,
+    ) -> Result<GetTxResponse, CosmosClient> {
+        let signer = self.signer()?;
+
+        let mut payload = Cosmos::build().add_msg(
+            MsgTransfer {
+                source_port: source_port.to_string(),
+                source_channel: source_channel.to_string(),
+                token: Some(coin),
+                sender: signer.public_address.to_string(),
+                receiver: to.to_string(),
+                timeout_height,
+                timeout_timestamp,
+            }
+                .to_any()?,
         );
         if let Some(memo) = memo {
             payload = payload.memo(memo);
