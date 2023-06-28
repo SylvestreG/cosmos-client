@@ -21,4 +21,4 @@ thiserror = "1.0.40"
 hex = "0.4.3"
 
 [dev-dependencies]
-tokio = { version = "1.28.2", features = ["full"] }
+tokio = { version = "1.29.0", features = ["full"] }
