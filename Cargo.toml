@@ -22,3 +22,6 @@ hex = "0.4.3"
 
 [dev-dependencies]
 tokio = { version = "1.28.2", features = ["full"] }
+cosmwasm-schema = "1.2.6"
+cosmwasm-std = "1.2.6"
+colored = "2.0.0"
