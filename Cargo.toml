@@ -24,4 +24,4 @@ hex = "0.4.3"
 tokio = { version = "1.29.1", features = ["full"] }
 cosmwasm-schema = "1.2.6"
 cosmwasm-std = "1.2.6"
-colored = "2.0.0"
+colored = "2.0.1"
