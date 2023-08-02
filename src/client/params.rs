@@ -1,9 +1,9 @@
 use crate::error::CosmosClient;
 use crate::error::CosmosClient::{ProstDecodeError, RpcError};
 use cosmos_sdk_proto::cosmos::params::v1beta1::{QueryParamsRequest, QueryParamsResponse};
-use tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
+use tendermint::abci::Code;
 use tendermint_rpc::{Client, HttpClient};
 
 pub struct Module {

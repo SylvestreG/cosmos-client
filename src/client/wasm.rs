@@ -9,11 +9,11 @@ use cosmos_sdk_proto::cosmwasm::wasm::v1::{
     QueryPinnedCodesResponse, QueryRawContractStateRequest, QueryRawContractStateResponse,
     QuerySmartContractStateRequest,
 };
-use tendermint::abci::Code;
 use prost::Message;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::rc::Rc;
+use tendermint::abci::Code;
 use tendermint_rpc::{Client, HttpClient};
 
 pub struct Module {

@@ -11,9 +11,9 @@ use cosmos_sdk_proto::cosmos::distribution::v1beta1::{
     QueryValidatorOutstandingRewardsRequest, QueryValidatorOutstandingRewardsResponse,
     QueryValidatorSlashesRequest, QueryValidatorSlashesResponse,
 };
-use tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
+use tendermint::abci::Code;
 use tendermint_rpc::{Client, HttpClient};
 
 pub struct Module {

@@ -8,9 +8,9 @@ use cosmos_sdk_proto::cosmos::gov::v1beta1::{
     QueryTallyResultResponse, QueryVoteRequest, QueryVoteResponse, QueryVotesRequest,
     QueryVotesResponse,
 };
-use tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
+use tendermint::abci::Code;
 use tendermint_rpc::{Client, HttpClient};
 
 pub struct Module {

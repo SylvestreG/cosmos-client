@@ -4,9 +4,9 @@ use cosmos_sdk_proto::cosmos::mint::v1beta1::{
     QueryAnnualProvisionsRequest, QueryAnnualProvisionsResponse, QueryInflationRequest,
     QueryInflationResponse, QueryParamsRequest, QueryParamsResponse,
 };
-use tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
+use tendermint::abci::Code;
 use tendermint_rpc::{Client, HttpClient};
 
 pub struct Module {
