@@ -5,7 +5,7 @@ use cosmos_sdk_proto::cosmos::upgrade::v1beta1::{
     QueryModuleVersionsRequest, QueryModuleVersionsResponse, QueryUpgradedConsensusStateRequest,
     QueryUpgradedConsensusStateResponse,
 };
-use cosmrs::tendermint::abci::Code;
+use tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};

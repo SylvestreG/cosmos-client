@@ -5,9 +5,9 @@ use cosmos_sdk_proto::cosmos::auth::v1beta1::{
     QueryParamsRequest, QueryParamsResponse,
 };
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
-use cosmrs::tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
+use tendermint::abci::Code;
 use tendermint_rpc::{Client, HttpClient};
 
 pub struct Module {

@@ -9,7 +9,7 @@ use cosmos_sdk_proto::cosmwasm::wasm::v1::{
     QueryPinnedCodesResponse, QueryRawContractStateRequest, QueryRawContractStateResponse,
     QuerySmartContractStateRequest,
 };
-use cosmrs::tendermint::abci::Code;
+use tendermint::abci::Code;
 use prost::Message;
 use serde::de::DeserializeOwned;
 use serde::Serialize;

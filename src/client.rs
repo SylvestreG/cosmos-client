@@ -111,11 +111,25 @@ impl Rpc {
             .auth
             .account(signer.public_address.to_string().as_str())
             .await?;
+
         if let Some(account) = account.account {
-            if let Ok(CosmosType::BaseAccount(account)) = any_to_cosmos(&account) {
-                self.sequence_id = Some(account.sequence);
-                self.account_id = Some(account.account_number);
-                return Ok(());
+            match any_to_cosmos(&account)? {
+                CosmosType::BaseAccount(account) => {
+                    self.sequence_id = Some(account.sequence);
+                    self.account_id = Some(account.account_number);
+                    return Ok(());
+                }
+                CosmosType::ContinuousVestingAccount(account) => {
+                    let account = account
+                        .base_vesting_account
+                        .ok_or(CosmosClient::NoVestingBaseAccount)?
+                        .base_account
+                        .ok_or(CosmosClient::NoVestingBaseAccount)?;
+                    self.sequence_id = Some(account.sequence);
+                    self.account_id = Some(account.account_number);
+                    return Ok(());
+                }
+                _ => {}
             }
         }
 

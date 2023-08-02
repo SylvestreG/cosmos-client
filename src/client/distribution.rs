@@ -11,7 +11,7 @@ use cosmos_sdk_proto::cosmos::distribution::v1beta1::{
     QueryValidatorOutstandingRewardsRequest, QueryValidatorOutstandingRewardsResponse,
     QueryValidatorSlashesRequest, QueryValidatorSlashesResponse,
 };
-use cosmrs::tendermint::abci::Code;
+use tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};

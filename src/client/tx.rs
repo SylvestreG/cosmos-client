@@ -3,7 +3,7 @@ use crate::error::CosmosClient::{ProstDecodeError, RpcError};
 use cosmos_sdk_proto::cosmos::tx::v1beta1::{
     BroadcastMode, GetTxRequest, GetTxResponse, SimulateRequest, SimulateResponse,
 };
-use cosmrs::tendermint::abci::Code;
+use tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::endpoint::broadcast::{tx_async, tx_commit, tx_sync};

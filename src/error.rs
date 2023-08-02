@@ -48,4 +48,6 @@ pub enum CosmosClient {
     RpcError(String),
     #[error("Tx Polling Timeout")]
     TXPollingTimeout,
+    #[error("No base account for vesting wallet")]
+    NoVestingBaseAccount,
 }

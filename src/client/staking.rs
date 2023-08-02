@@ -13,7 +13,7 @@ use cosmos_sdk_proto::cosmos::staking::v1beta1::{
     QueryValidatorResponse, QueryValidatorUnbondingDelegationsRequest,
     QueryValidatorUnbondingDelegationsResponse, QueryValidatorsRequest, QueryValidatorsResponse,
 };
-use cosmrs::tendermint::abci::Code;
+use tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};

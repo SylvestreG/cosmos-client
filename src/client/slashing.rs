@@ -5,7 +5,7 @@ use cosmos_sdk_proto::cosmos::slashing::v1beta1::{
     QueryParamsRequest, QueryParamsResponse, QuerySigningInfoRequest, QuerySigningInfoResponse,
     QuerySigningInfosRequest, QuerySigningInfosResponse,
 };
-use cosmrs::tendermint::abci::Code;
+use tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};

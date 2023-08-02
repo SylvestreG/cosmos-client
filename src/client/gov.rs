@@ -8,7 +8,7 @@ use cosmos_sdk_proto::cosmos::gov::v1beta1::{
     QueryTallyResultResponse, QueryVoteRequest, QueryVoteResponse, QueryVotesRequest,
     QueryVotesResponse,
 };
-use cosmrs::tendermint::abci::Code;
+use tendermint::abci::Code;
 use prost::Message;
 use std::rc::Rc;
 use tendermint_rpc::{Client, HttpClient};
