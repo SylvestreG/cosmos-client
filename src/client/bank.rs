@@ -9,16 +9,16 @@ use cosmos_sdk_proto::cosmos::bank::v1beta1::{
 };
 use cosmos_sdk_proto::cosmos::base::query::v1beta1::PageRequest;
 use prost::Message;
-use std::rc::Rc;
+use std::sync::Arc;
 use tendermint::abci::Code;
 use tendermint_rpc::{Client, HttpClient};
 
 pub struct Module {
-    rpc: Rc<HttpClient>,
+    rpc: Arc<HttpClient>,
 }
 
 impl Module {
-    pub fn new(rpc: Rc<HttpClient>) -> Self {
+    pub fn new(rpc: Arc<HttpClient>) -> Self {
         Module { rpc }
     }
 
