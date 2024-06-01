@@ -27,8 +27,8 @@ use cosmos_sdk_proto::traits::MessageExt;
 use cosmrs::tendermint::chain;
 use cosmrs::tx::{Fee, SignDoc, SignerInfo};
 use std::ops::{DivAssign, MulAssign};
-use std::rc::Rc;
 use std::str::FromStr;
+use std::sync::Arc;
 use std::thread::sleep;
 use std::time::Duration;
 use tendermint_rpc::{Client, HttpClient};
@@ -65,7 +65,7 @@ impl Rpc {
     /// Will return `Err` if :
     /// - rpc server is down or invalid
     pub async fn new(url: &str) -> Result<Self, CosmosClient> {
-        let rpc = Rc::new(HttpClient::new(url)?);
+        let rpc = Arc::new(HttpClient::new(url)?);
 
         Ok(Rpc {
             chain_id: rpc.status().await?.node_info.network.to_string(),

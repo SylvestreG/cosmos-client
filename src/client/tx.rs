@@ -4,7 +4,7 @@ use cosmos_sdk_proto::cosmos::tx::v1beta1::{
     BroadcastMode, GetTxRequest, GetTxResponse, SimulateRequest, SimulateResponse,
 };
 use prost::Message;
-use std::rc::Rc;
+use std::sync::Arc;
 use tendermint::abci::Code;
 use tendermint_rpc::endpoint::broadcast::{tx_async, tx_commit, tx_sync};
 use tendermint_rpc::{Client, HttpClient};
@@ -17,11 +17,11 @@ pub enum Response {
 }
 
 pub struct Module {
-    rpc: Rc<HttpClient>,
+    rpc: Arc<HttpClient>,
 }
 
 impl Module {
-    pub fn new(rpc: Rc<HttpClient>) -> Self {
+    pub fn new(rpc: Arc<HttpClient>) -> Self {
         Module { rpc }
     }
 
